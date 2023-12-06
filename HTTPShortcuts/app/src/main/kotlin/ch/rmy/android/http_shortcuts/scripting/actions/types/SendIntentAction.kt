@@ -4,8 +4,12 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Build
 import android.os.FileUriExposedException
+import android.util.Log
+import android.widget.Toast
 import androidx.core.net.toUri
 import ch.rmy.android.framework.extensions.logException
+import ch.rmy.android.framework.extensions.logInfo
+import ch.rmy.android.framework.extensions.showToast
 import ch.rmy.android.framework.extensions.takeUnlessEmpty
 import ch.rmy.android.http_shortcuts.R
 import ch.rmy.android.http_shortcuts.exceptions.ActionException
@@ -81,6 +85,7 @@ constructor(
         private const val EXTRA_TYPE_LONG = "long"
         private const val EXTRA_TYPE_DOUBLE = "double"
         private const val EXTRA_TYPE_FLOAT = "float"
+        private const val EXTRA_TYPE_STRINGARR = "string[]"
 
         private const val TYPE_ACTIVITY = "activity"
         private const val TYPE_SERVICE = "service"
@@ -158,6 +163,9 @@ constructor(
                             }
                             EXTRA_TYPE_LONG -> {
                                 putExtra(name, extra.optLong(KEY_EXTRA_VALUE))
+                            }
+                            EXTRA_TYPE_STRINGARR -> {
+                                putExtra(name, extra.optJSONArray(KEY_EXTRA_VALUE)?.toListOfStrings()?.toTypedArray());
                             }
                             else -> {
                                 putExtra(name, extra.optString(KEY_EXTRA_VALUE))
