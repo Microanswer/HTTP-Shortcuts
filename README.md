@@ -1,4 +1,11 @@
 # HTTP Shortcuts for Android
+
+我 fork 此项目并进行了自己的修改以实现：
+1. sendIntent 函数发送命令给 Termux 执行时，支持数组参数。
+2. 添加 `<uses-permission android:name="com.termux.permission.RUN_COMMAND"/>`到 AndroidManifest.xml 中。
+
+要让本app可以成功发送命令termux并执行，你需要在权限设置中开启本app的com.termux.permission.RUN_COMMAND权限。
+
 <a href="https://http-shortcuts.rmy.ch/">
 <img src="/assets/logo.png" style="margin-left: 1em; float: right" alt="HTTP Shortcuts"/>
 </a>
