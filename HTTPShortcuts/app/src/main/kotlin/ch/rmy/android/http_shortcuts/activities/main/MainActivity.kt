@@ -4,9 +4,13 @@ import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.appcompat.app.AlertDialog
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -22,11 +26,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
+import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
 import ch.rmy.android.framework.extensions.finishWithoutAnimation
 import ch.rmy.android.framework.extensions.logException
 import ch.rmy.android.framework.extensions.openURL
 import ch.rmy.android.framework.extensions.restartWithoutAnimation
+import ch.rmy.android.framework.extensions.showToast
 import ch.rmy.android.framework.extensions.startActivity
 import ch.rmy.android.framework.ui.BaseIntentBuilder
 import ch.rmy.android.framework.viewmodel.ViewModelEvent
@@ -44,6 +50,8 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : BaseComposeActivity() {
+
+    private var termuxPermissionRequestCode = -1;
 
     override fun onCreated(savedState: Bundle?) {
         fixTabMinWidth()
@@ -89,8 +97,8 @@ class MainActivity : BaseComposeActivity() {
 
         Box(
             modifier = Modifier
-                .navigationBarsPadding()
-                .fillMaxSize(),
+                    .navigationBarsPadding()
+                    .fillMaxSize(),
         ) {
             NavigationRoot()
         }
@@ -186,10 +194,63 @@ class MainActivity : BaseComposeActivity() {
         )
     }
 
+    private fun checkTermuxPermission() {
+        var has = false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val result = checkSelfPermission("com.termux.permission.RUN_COMMAND")
+            has = result == PackageManager.PERMISSION_GRANTED
+        } else {
+            has = true
+        }
+
+        if (has) {
+            showToast(getString(R.string.termux_permission_has), false);
+        } else {
+            // 没有权限，请求权限。
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, "com.termux.permission.RUN_COMMAND")) {
+                this.termuxPermissionRequestCode = Math.round(Math.random() * 10000).toInt()
+                ActivityCompat.requestPermissions(this, arrayOf("com.termux.permission.RUN_COMMAND"), this.termuxPermissionRequestCode)
+            } else {
+
+                AlertDialog.Builder(this)
+                        .setTitle(getString(R.string.settings_check_termux_permission_title)) // 设置对话框标题
+                        .setMessage("你之前手动拒绝过此权限，现在需要在手机设置中手动授予RUN_COMMAND权限。") // 设置对话框消息
+                        .setPositiveButton("前往设置") { dialog, which ->
+                            // 用户点击设置按钮后的操作
+                            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                            val uri = Uri.fromParts("package", packageName, null)
+                            intent.data = uri
+                            startActivity(intent)
+                            dialog.dismiss()
+                        }
+                        .setNegativeButton(getString(R.string.dialog_cancel)) { dialog, which ->
+                            // 用户取消操作
+                            dialog.dismiss()
+                        }
+                        .create()
+                        .show()
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == this.termuxPermissionRequestCode) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                showToast(getString(R.string.termux_permission_has), false)
+            } else {
+                showToast(getString(R.string.termux_permission_fail), false)
+            }
+        }
+    }
+
     override fun handleEvent(event: ViewModelEvent) {
         when (event) {
             MainEvent.Restart -> {
                 restartWithoutAnimation()
+            }
+            MainEvent.CheckTermuxPermission -> {
+                checkTermuxPermission()
             }
             else -> super.handleEvent(event)
         }

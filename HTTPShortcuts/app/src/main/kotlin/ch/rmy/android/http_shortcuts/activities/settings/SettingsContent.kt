@@ -14,7 +14,9 @@ import androidx.compose.material.icons.outlined.DarkMode
 import androidx.compose.material.icons.outlined.Javascript
 import androidx.compose.material.icons.outlined.Language
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockReset
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Security
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Title
 import androidx.compose.material.icons.outlined.TouchApp
@@ -47,6 +49,7 @@ fun SettingsContent(
     onChangeTitleButtonClicked: () -> Unit,
     onUserAgentButtonClicked: () -> Unit,
     onLockButtonClicked: () -> Unit,
+    onCheckTermuxPermissionButtonClicked: () -> Unit,
     onQuickSettingsTileButtonClicked: () -> Unit,
     onCertificatePinningButtonClicked: () -> Unit,
     onGlobalScriptingButtonClicked: () -> Unit,
@@ -57,10 +60,20 @@ fun SettingsContent(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(bottom = Spacing.SMALL),
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = Spacing.SMALL),
     ) {
+
+        SettingsGroup(title = stringResource(R.string.settings_title_other)) {
+            SettingsButton(
+               icon = Icons.Outlined.Security,
+               title = stringResource(R.string.settings_check_termux_permission_title),
+               subtitle = stringResource(R.string.settings_check_termux_permission_subtitle),
+               onClick = onCheckTermuxPermissionButtonClicked,
+            )
+        }
+
         SettingsGroup(
             title = stringResource(R.string.settings_title_basic),
         ) {

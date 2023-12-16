@@ -8,4 +8,5 @@ data class AboutViewState(
     val fDroidVisible: Boolean,
     val changeLogDialogPermanentlyHidden: Boolean,
     val changeLogDialogVisible: Boolean = false,
+    val customChangeLogDialogVisible: Boolean = false,
 )

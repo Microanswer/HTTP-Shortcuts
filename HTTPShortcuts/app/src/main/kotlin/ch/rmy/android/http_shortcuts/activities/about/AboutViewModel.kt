@@ -34,6 +34,18 @@ constructor(
         settings.isChangeLogPermanentlyHidden = hidden
     }
 
+    fun onCustomeChangeLogDialogHide() = runAction {
+        updateViewState {
+            copy(customChangeLogDialogVisible = false)
+        }
+    }
+
+    fun onCustomeChangeLogButtonClicked() = runAction {
+        updateViewState {
+            copy(customChangeLogDialogVisible = true)
+        }
+    }
+
     fun onChangeLogButtonClicked() = runAction {
         updateViewState {
             copy(changeLogDialogVisible = true)

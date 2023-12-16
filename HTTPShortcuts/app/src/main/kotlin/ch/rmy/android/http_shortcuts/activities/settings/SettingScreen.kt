@@ -2,6 +2,7 @@ package ch.rmy.android.http_shortcuts.activities.settings
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import ch.rmy.android.http_shortcuts.R
 import ch.rmy.android.http_shortcuts.components.SimpleScaffold
 import ch.rmy.android.http_shortcuts.components.bindViewModel
@@ -15,6 +16,7 @@ fun SettingsScreen() {
         title = stringResource(R.string.title_settings),
     ) { viewState ->
         SettingsContent(
+            onCheckTermuxPermissionButtonClicked = viewModel::onCheckTermuxPermissionButtonClicked,
             privacySectionVisible = viewState.privacySectionVisible,
             quickSettingsTileButtonVisible = viewState.quickSettingsTileButtonVisible,
             selectedLanguage = viewState.selectedLanguage,

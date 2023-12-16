@@ -1,10 +1,17 @@
 package ch.rmy.android.http_shortcuts.activities.settings
 
 import android.app.Application
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.compose.ui.res.stringResource
+import androidx.core.app.ActivityCompat
 import ch.rmy.android.framework.extensions.context
 import ch.rmy.android.framework.extensions.logException
+import ch.rmy.android.framework.extensions.showToast
 import ch.rmy.android.framework.viewmodel.BaseViewModel
 import ch.rmy.android.http_shortcuts.R
+import ch.rmy.android.http_shortcuts.activities.main.MainEvent
 import ch.rmy.android.http_shortcuts.activities.settings.usecases.CreateQuickSettingsTileUseCase
 import ch.rmy.android.http_shortcuts.data.domains.app.AppRepository
 import ch.rmy.android.http_shortcuts.data.enums.ShortcutClickBehavior
@@ -17,6 +24,7 @@ import ch.rmy.android.http_shortcuts.utils.DarkThemeHelper
 import ch.rmy.android.http_shortcuts.utils.LocaleHelper
 import ch.rmy.android.http_shortcuts.utils.RestrictionsUtil
 import ch.rmy.android.http_shortcuts.utils.Settings
+import com.joaomgcd.taskerpluginlibrary.getStringFromResourceIdOrResourceName
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -37,6 +45,7 @@ constructor(
     private val createQuickSettingsTile: CreateQuickSettingsTileUseCase,
     private val biometricUtil: BiometricUtil,
 ) : BaseViewModel<Unit, SettingsViewState>(application) {
+    private val appContext: Context = application.applicationContext
 
     override suspend fun initialize(data: Unit) = SettingsViewState(
         privacySectionVisible = Logging.supportsCrashReporting,
@@ -95,6 +104,9 @@ constructor(
         }
     }
 
+    fun onCheckTermuxPermissionButtonClicked() = runAction {
+        emitEvent(MainEvent.CheckTermuxPermission)
+    }
     fun onLanguageSelected(language: String?) = runAction {
         settings.language = language
         updateViewState {

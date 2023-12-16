@@ -165,7 +165,7 @@ constructor(
                                 putExtra(name, extra.optLong(KEY_EXTRA_VALUE))
                             }
                             EXTRA_TYPE_STRINGARR -> {
-                                putExtra(name, extra.optJSONArray(KEY_EXTRA_VALUE)?.toListOfStrings()?.toTypedArray());
+                                putExtra(name, extra.optJSONArray(KEY_EXTRA_VALUE)?.toListOfStrings()?.toTypedArray())
                             }
                             else -> {
                                 putExtra(name, extra.optString(KEY_EXTRA_VALUE))

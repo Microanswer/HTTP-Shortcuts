@@ -6,8 +6,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Article
+import androidx.compose.material.icons.outlined.AssignmentTurnedIn
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Extension
 import androidx.compose.material.icons.outlined.LiveHelp
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.Translate
@@ -23,6 +25,7 @@ import ch.rmy.android.http_shortcuts.components.Spacing
 fun AboutContent(
     versionNumber: String,
     fDroidVisible: Boolean,
+    onCustomeChangeLogButtonClicked: () -> Unit,
     onChangeLogButtonClicked: () -> Unit,
     onDocumentationButtonClicked: () -> Unit,
     onContactButtonClicked: () -> Unit,
@@ -36,9 +39,17 @@ fun AboutContent(
 ) {
     Column(
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(bottom = Spacing.SMALL),
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = Spacing.SMALL),
     ) {
+
+        SettingsButton(
+                icon = Icons.Outlined.Extension,
+                title = stringResource(R.string.settings_custom_changelog),
+                subtitle = stringResource(R.string.settings_custom_changelog_summary),
+                onClick = onCustomeChangeLogButtonClicked,
+        )
+
         SettingsButton(
             icon = Icons.Outlined.Code,
             title = stringResource(R.string.settings_changelog),

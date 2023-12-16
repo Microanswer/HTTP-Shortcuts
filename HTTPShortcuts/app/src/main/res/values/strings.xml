@@ -174,6 +174,8 @@
     <string name="title_about">Information</string>
     <!-- Name of toolbar action: Unlock all settings (will prompt user to enter passcode) -->
     <string name="menu_action_unlock_app">Unlock settings</string>
+    <!-- 附加功能设置界面分组标题 -->
+    <string name="settings_title_other">Other Feature</string>
     <!-- Title of section in "Settings" screen: Basic settings -->
     <string name="settings_title_basic">Basic Settings</string>
     <!-- Title of section in "Settings" screen: (Visual) Appearance of the app itself (e.g. themes, dark mode) -->
@@ -293,6 +295,12 @@
     </plurals>
     <!-- Pattern: Combines an indication of minutes (first %s) with an indication of seconds (second %s), e.g. 1 minute, 24 seconds -->
     <string name="pattern_minutes_seconds">%1$s, %2$s</string>
+
+    <!-- 按钮标题，用于关于界面显示自定义修改内容 -->
+    <string name="settings_custom_changelog">Other Feature</string>
+    <!-- 按钮描述，用于关于界面自动逸修改按钮的描述 -->
+    <string name="settings_custom_changelog_summary">Introduces where Microanswer has been modified.</string>
+
     <!-- Section title in app settings. Section contains options for analyzing and fixing problems with the app -->
     <string name="settings_troubleshooting">Troubleshooting</string>
     <!-- Title of option in settings to show change changelog of current and past versions -->
@@ -634,6 +642,12 @@
     <string name="settings_privacy_policy">Privacy Policy</string>
     <!-- Summary/subtitle of section in settings that allows user to click to open privacy policy dialog -->
     <string name="settings_privacy_policy_summary">Nope, not stealing your data</string>
+
+    <!-- 申请Termux授权. -->
+    <string name="settings_check_termux_permission_title">Check Termux Permission</string>
+    <!-- 申请Termux授权.按钮介绍 -->
+    <string name="settings_check_termux_permission_subtitle">Click to check if termux permission granted.</string>
+
     <!-- Title of section in settings that allows user to lock all settings with a passcode. -->
     <string name="settings_lock_app_title">Lock Settings</string>
     <!-- Summary/subtitle of section in settings that allows user to lock all settings with a passcode. -->
@@ -1523,4 +1537,7 @@
     <string name="icon_shape_square">Square</string>
     <!-- Option in dialog that lets the user choose the shape of their custom icon -->
     <string name="icon_shape_round">Round</string>
+
+    <string name="termux_permission_has">Permission Granted.</string>
+    <string name="termux_permission_fail">Termux Permission Fail.</string>
 </resources>

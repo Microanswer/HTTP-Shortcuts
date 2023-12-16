@@ -174,6 +174,8 @@
     <string name="title_settings">设置</string>
     <!-- Menu item in main toolbar menu, leads to page with information about the app (changelog, documentation, …) -->
     <string name="title_about">关于</string>
+    <!-- 附加功能设置界面分组标题 -->
+    <string name="settings_title_other">附加功能</string>
     <!-- Name of toolbar action: Unlock all settings (will prompt user to enter passcode) -->
     <string name="menu_action_unlock_app">解锁设置</string>
     <!-- Title of section in "Settings" screen: Basic settings -->
@@ -293,6 +295,12 @@
     <string name="pattern_minutes_seconds">%1$s , %2$s</string>
     <!-- Section title in app settings. Section contains options for analyzing and fixing problems with the app -->
     <string name="settings_troubleshooting">故障排除</string>
+
+    <!-- 按钮标题，用于关于界面显示自定义修改内容 -->
+    <string name="settings_custom_changelog">附加功能</string>
+    <!-- 按钮描述，用于关于界面自动逸修改按钮的描述 -->
+    <string name="settings_custom_changelog_summary">了解Microanswer新增了哪些功能</string>
+
     <!-- Title of option in settings to show change changelog of current and past versions -->
     <string name="settings_changelog">更新日志</string>
     <!-- Subtitle/summary of "Changelog" option in settings, showing the current app version number -->
@@ -635,6 +643,12 @@
     <string name="settings_lock_app_title">锁定设置</string>
     <!-- Summary/subtitle of section in settings that allows user to lock all settings with a passcode. -->
     <string name="settings_lock_app_summary">防止更改快捷方式和设置</string>
+
+    <!-- 申请Termux授权. -->
+    <string name="settings_check_termux_permission_title">Termux权限申请</string>
+    <!-- 申请Termux授权.按钮介绍 -->
+    <string name="settings_check_termux_permission_subtitle">点击检查是否拥有运行命令的权限。</string>
+
     <!-- Title of section in settings that allows user to add a quick settings tile. -->
     <string name="settings_add_quick_settings_tile_title">快速设置磁贴</string>
     <!-- Summary/subtitle of section in settings that allows user to add a quick settings tile. -->
@@ -1528,4 +1542,6 @@
     <string name="icon_shape_square">方型</string>
     <!-- Option in dialog that lets the user choose the shape of their custom icon -->
     <string name="icon_shape_round">圆形</string>
+    <string name="termux_permission_has">已拥有Termux运行权限</string>
+    <string name="termux_permission_fail">Termux请求授权失败</string>
 </resources>

@@ -365,6 +365,12 @@ tasks.register("syncChangeLog") {
             outputFile = "changelog.html",
             templateFile = "changelog_template.html",
         )
+
+        generateHtmlFromMarkdown(
+                inputFile = "CUSTOMCHANGELOG.md",
+                outputFile = "customchangelog.html",
+                templateFile = "custom_changelog_template.html",
+        )
     }
 }
 
