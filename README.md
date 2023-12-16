@@ -33,6 +33,9 @@ sendIntent({
 // 将 allow-external-apps = true 前面的 "#" 号去掉
 ```
 
+<br><br>
+---------
+<br><br>
 
 <a href="https://http-shortcuts.rmy.ch/">
 <img src="/assets/logo.png" style="margin-left: 1em; float: right" alt="HTTP Shortcuts"/>
