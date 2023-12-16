@@ -4,7 +4,35 @@
 1. sendIntent 函数发送命令给 Termux 执行时，支持数组参数。
 2. 添加 `<uses-permission android:name="com.termux.permission.RUN_COMMAND"/>`到 AndroidManifest.xml 中。
 
-要让本app可以成功发送命令termux并执行，你需要在权限设置中开启本app的com.termux.permission.RUN_COMMAND权限。
+要让本app可以成功发送命令termux并执行，你需要在设置中通过【Termux权限申请】来开启本app的com.termux.permission.RUN_COMMAND权限，
+然后你就可以这样使用了：
+
+```javascript
+sendIntent({
+    type: "service",
+    action: "com.termux.RUN_COMMAND",
+    packageName: "com.termux",
+    className: "com.termux.app.RunCommandService",
+    extras: [
+        {
+            name: "com.termux.RUN_COMMAND_PATH",
+            type: "string",
+            value: "/data/data/com.termux/files/usr/bin/ping",
+        },{
+            name: "com.termux.RUN_COMMAND_ARGUMENTS",
+            type: "string[]",
+            value: ["192.168.1.1"],
+    }]
+})
+```
+
+当然，你还需要在Termux中设置允许外部程序调用，修改方法：
+
+```shell
+// 用你喜欢的编辑器修改 ~/.termux/termux.properties 文件内容
+// 将 allow-external-apps = true 前面的 "#" 号去掉
+```
+
 
 <a href="https://http-shortcuts.rmy.ch/">
 <img src="/assets/logo.png" style="margin-left: 1em; float: right" alt="HTTP Shortcuts"/>
