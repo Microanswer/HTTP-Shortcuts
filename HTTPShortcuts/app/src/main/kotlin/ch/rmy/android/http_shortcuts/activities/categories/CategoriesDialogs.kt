@@ -35,13 +35,15 @@ fun CategoriesDialogs(
         }
         is CategoriesDialogState.Deletion -> {
             DeletionConfirmDialog(
-                onDeletionConfirmed,
-                onDismissRequested,
+                title = dialogState.title,
+                onConfirmed = onDeletionConfirmed,
+                onDismissRequested = onDismissRequested,
             )
         }
         is CategoriesDialogState.IconPicker -> {
             IconPickerDialog(
                 currentIcon = dialogState.currentIcon,
+                suggestionBase = dialogState.suggestionBase,
                 title = stringResource(R.string.title_category_select_icon),
                 onCustomIconOptionSelected = onCustomIconOptionSelected,
                 onIconSelected = onIconSelected,
@@ -101,10 +103,12 @@ private fun ContextMenuDialog(
 
 @Composable
 private fun DeletionConfirmDialog(
+    title: String,
     onConfirmed: () -> Unit,
     onDismissRequested: () -> Unit,
 ) {
     ConfirmDialog(
+        title = title,
         message = stringResource(R.string.confirm_delete_category_message),
         confirmButton = stringResource(R.string.dialog_delete),
         onConfirmRequest = onConfirmed,

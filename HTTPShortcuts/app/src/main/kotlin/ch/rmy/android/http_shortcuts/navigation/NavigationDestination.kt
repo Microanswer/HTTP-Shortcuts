@@ -8,6 +8,7 @@ import ch.rmy.android.framework.navigation.NavigationRequest
 import ch.rmy.android.http_shortcuts.data.domains.categories.CategoryId
 import ch.rmy.android.http_shortcuts.data.domains.shortcuts.ShortcutId
 import ch.rmy.android.http_shortcuts.data.domains.variables.VariableId
+import ch.rmy.android.http_shortcuts.data.domains.working_directories.WorkingDirectoryId
 import ch.rmy.android.http_shortcuts.data.enums.ShortcutExecutionType
 import ch.rmy.android.http_shortcuts.data.enums.VariableType
 import ch.rmy.android.http_shortcuts.icons.ShortcutIcon
@@ -66,6 +67,7 @@ sealed interface NavigationDestination {
 
     object CodeSnippetPicker : NavigationDestination {
         private const val ARG_SHORTCUT_ID = "shortcutId"
+        private const val ARG_INCLUDE_SUCCESS_OPTIONS = "includeSuccessOptions"
         private const val ARG_INCLUDE_RESPONSE_OPTIONS = "includeResponseOptions"
         private const val ARG_INCLUDE_NETWORK_ERROR_OPTION = "includeNetworkErrorOption"
 
@@ -74,22 +76,28 @@ sealed interface NavigationDestination {
         override val arguments =
             listOf(
                 optionalStringArg(ARG_SHORTCUT_ID),
+                optionalBooleanArg(ARG_INCLUDE_SUCCESS_OPTIONS),
                 optionalBooleanArg(ARG_INCLUDE_RESPONSE_OPTIONS),
                 optionalBooleanArg(ARG_INCLUDE_NETWORK_ERROR_OPTION),
             )
 
         fun buildRequest(
             shortcutId: ShortcutId? = null,
+            includeSuccessOptions: Boolean = false,
             includeResponseOptions: Boolean = false,
             includeNetworkErrorOption: Boolean = false,
         ) = buildNavigationRequest {
             parameter(ARG_SHORTCUT_ID, shortcutId)
+            parameter(ARG_INCLUDE_SUCCESS_OPTIONS, includeSuccessOptions)
             parameter(ARG_INCLUDE_RESPONSE_OPTIONS, includeResponseOptions)
             parameter(ARG_INCLUDE_NETWORK_ERROR_OPTION, includeNetworkErrorOption)
         }
 
         fun extractShortcutId(bundle: Bundle): ShortcutId? =
             bundle.getEncodedString(ARG_SHORTCUT_ID)
+
+        fun extractIncludeSuccessOptions(bundle: Bundle): Boolean =
+            bundle.getBoolean(ARG_INCLUDE_SUCCESS_OPTIONS)
 
         fun extractIncludeResponseOptions(bundle: Bundle): Boolean =
             bundle.getBoolean(ARG_INCLUDE_RESPONSE_OPTIONS)
@@ -166,8 +174,45 @@ sealed interface NavigationDestination {
         const val RESULT_CATEGORIES_CHANGED_FROM_IMPORT = "categories-changed-from-import"
     }
 
-    object MoveShortcuts : NoArgNavigationDestination {
+    object Export : NavigationDestination {
+        private const val ARG_TO_FILE = "toFile"
+
+        override val path = "export"
+
+        override val arguments =
+            listOf(
+                optionalBooleanArg(ARG_TO_FILE)
+            )
+
+        fun buildRequest(toFile: Boolean) =
+            buildNavigationRequest {
+                parameter(ARG_TO_FILE, toFile)
+            }
+
+        fun extractToFile(bundle: Bundle): Boolean =
+            bundle.getBoolean(ARG_TO_FILE)
+    }
+
+    object MoveShortcuts : NavigationDestination {
+        private const val ARG_SHORTCUT_ID = "shortcutId"
+
         override val path = "moveShortcuts"
+
+        override val arguments =
+            listOf(
+                stringArg(ARG_SHORTCUT_ID),
+            )
+
+        fun buildRequest(
+            shortcutId: ShortcutId,
+        ) = buildNavigationRequest {
+            pathPart(shortcutId)
+        }
+
+        fun extractShortcutId(bundle: Bundle): ShortcutId =
+            bundle.getEncodedString(ARG_SHORTCUT_ID)!!
+
+        const val RESULT_SHORTCUTS_MOVED = "shortcuts-moved"
     }
 
     object RemoteEdit : NoArgNavigationDestination {
@@ -182,6 +227,26 @@ sealed interface NavigationDestination {
         const val RESULT_APP_LOCKED = "app-locked"
     }
 
+    object TypePicker : NavigationDestination {
+        private const val ARG_CATEGORY_ID = "categoryId"
+
+        override val path = "shortcutEditor/typePicker"
+
+        override val arguments =
+            listOf(
+                stringArg(ARG_CATEGORY_ID),
+            )
+
+        fun buildRequest(
+            categoryId: CategoryId,
+        ) = buildNavigationRequest {
+            pathPart(categoryId)
+        }
+
+        fun extractCategoryId(bundle: Bundle): CategoryId =
+            bundle.getEncodedString(ARG_CATEGORY_ID)!!
+    }
+
     object ShortcutEditor : NavigationDestination {
         private const val ARG_EXECUTION_TYPE = "executionType"
         private const val ARG_CATEGORY_ID = "categoryId"
@@ -194,7 +259,7 @@ sealed interface NavigationDestination {
         override val arguments =
             listOf(
                 stringArg(ARG_EXECUTION_TYPE),
-                optionalStringArg(ARG_CATEGORY_ID),
+                stringArg(ARG_CATEGORY_ID),
                 optionalStringArg(ARG_SHORTCUT_ID),
                 optionalStringArg(ARG_CURL_COMMAND_ID),
                 optionalBooleanArg(ARG_RECOVERY_MODE),
@@ -202,20 +267,20 @@ sealed interface NavigationDestination {
 
         fun buildRequest(
             shortcutId: ShortcutId? = null,
-            categoryId: CategoryId? = null,
+            categoryId: CategoryId,
             executionType: ShortcutExecutionType = ShortcutExecutionType.APP,
             curlCommandId: NavigationArgStore.ArgStoreId? = null,
             recoveryMode: Boolean = false,
         ) = buildNavigationRequest {
             pathPart(executionType.type)
-            parameter(ARG_CATEGORY_ID, categoryId)
+            pathPart(categoryId)
             parameter(ARG_SHORTCUT_ID, shortcutId)
             parameter(ARG_CURL_COMMAND_ID, curlCommandId)
             parameter(ARG_RECOVERY_MODE, recoveryMode)
         }
 
-        fun extractCategoryId(bundle: Bundle): CategoryId? =
-            bundle.getEncodedString(ARG_CATEGORY_ID)
+        fun extractCategoryId(bundle: Bundle): CategoryId =
+            bundle.getEncodedString(ARG_CATEGORY_ID)!!
 
         fun extractShortcutId(bundle: Bundle): ShortcutId? =
             bundle.getEncodedString(ARG_SHORTCUT_ID)
@@ -269,13 +334,17 @@ sealed interface NavigationDestination {
         override val path = "shortcutEditor/response"
     }
 
+    object ShortcutEditorResponseDisplay : NoArgNavigationDestination {
+        override val path = "shortcutEditor/responseDisplay"
+    }
+
     object ShortcutEditorScripting : NavigationDestination {
         private const val ARG_SHORTCUT_ID = "shortcutId"
         override val path = "shortcutEditor/scripting"
 
         override val arguments =
             listOf(
-                optionalStringArg(ARG_SHORTCUT_ID)
+                optionalStringArg(ARG_SHORTCUT_ID),
             )
 
         fun buildRequest(shortcutId: ShortcutId?) = buildNavigationRequest {
@@ -368,9 +437,33 @@ sealed interface NavigationDestination {
             val shortcutId: ShortcutId,
             val labelColor: String,
             val showLabel: Boolean,
+            val showIcon: Boolean,
         ) : Serializable
 
         const val RESULT_WIDGET_SETTINGS_CANCELLED = "widget-settings-cancelled"
+    }
+
+    object WorkingDirectories : NavigationDestination {
+        private const val ARG_PICKER = "picker"
+
+        override val path = "workingDirectories"
+
+        override val arguments =
+            listOf(
+                booleanArg(ARG_PICKER),
+            )
+
+        fun buildRequest(picker: Boolean = false) = buildNavigationRequest {
+            pathPart(picker)
+        }
+
+        fun extractPicker(bundle: Bundle): Boolean =
+            bundle.getBoolean(ARG_PICKER)
+
+        data class WorkingDirectoryPickerResult(
+            val workingDirectoryId: WorkingDirectoryId,
+            val name: String,
+        ) : Serializable
     }
 }
 

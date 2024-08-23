@@ -38,6 +38,8 @@ fun ExecutionSettingsContent(
     excludeFromHistory: Boolean,
     repetitionInterval: Int?,
     canUseBiometrics: Boolean,
+    excludeFromFileSharing: Boolean,
+    usesFiles: Boolean,
     onLauncherShortcutChanged: (Boolean) -> Unit,
     onSecondaryLauncherShortcutChanged: (Boolean) -> Unit,
     onQuickSettingsTileShortcutChanged: (Boolean) -> Unit,
@@ -46,16 +48,18 @@ fun ExecutionSettingsContent(
     onWaitForConnectionChanged: (Boolean) -> Unit,
     onDelayButtonClicked: () -> Unit,
     onRepetitionIntervalChanged: (Int?) -> Unit,
+    onExcludeFromFileSharingChanged: (Boolean) -> Unit,
 ) {
     Column(
         modifier = Modifier.verticalScroll(rememberScrollState()),
     ) {
         if (launcherShortcutOptionVisible) {
             Checkbox(
-                label = if (directShareOptionVisible) {
-                    stringResource(R.string.label_launcher_shortcut_or_direct_share)
+                label = stringResource(R.string.label_launcher_shortcut),
+                subtitle = if (directShareOptionVisible) {
+                    stringResource(R.string.subtitle_launcher_shortcut_with_direct_share)
                 } else {
-                    stringResource(R.string.label_launcher_shortcut)
+                    stringResource(R.string.subtitle_launcher_shortcut)
                 },
                 checked = launcherShortcut,
                 onCheckedChange = onLauncherShortcutChanged,
@@ -64,6 +68,7 @@ fun ExecutionSettingsContent(
 
         Checkbox(
             label = stringResource(R.string.label_secondary_launcher_shortcut),
+            subtitle = stringResource(R.string.subtitle_secondary_launcher_shortcut),
             checked = secondaryLauncherShortcut,
             onCheckedChange = onSecondaryLauncherShortcutChanged,
         )
@@ -75,6 +80,16 @@ fun ExecutionSettingsContent(
                 onCheckedChange = onQuickSettingsTileShortcutChanged,
             )
         }
+
+        Checkbox(
+            label = stringResource(R.string.label_shortcut_as_file_share_target),
+            subtitle = stringResource(R.string.subtitle_shortcut_as_file_share_target),
+            checked = !excludeFromFileSharing,
+            enabled = usesFiles,
+            onCheckedChange = {
+                onExcludeFromFileSharingChanged(!it)
+            },
+        )
 
         HorizontalDivider()
 

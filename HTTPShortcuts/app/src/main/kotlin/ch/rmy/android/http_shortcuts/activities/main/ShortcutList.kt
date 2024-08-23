@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -52,8 +53,11 @@ import ch.rmy.android.http_shortcuts.components.Spacing
 import ch.rmy.android.http_shortcuts.data.domains.shortcuts.ShortcutId
 import ch.rmy.android.http_shortcuts.data.enums.CategoryLayoutType
 
+private const val HIDDEN_ALPHA = 0.4f
+
 @Composable
 fun ShortcutList(
+    hasMultipleCategories: Boolean,
     shortcuts: List<ShortcutItem>,
     layoutType: CategoryLayoutType,
     textColor: Color?,
@@ -63,10 +67,16 @@ fun ShortcutList(
     onShortcutLongClicked: (ShortcutId) -> Unit,
 ) {
     if (shortcuts.isEmpty()) {
-        EmptyState(
-            title = stringResource(R.string.empty_state_shortcuts),
-            description = stringResource(R.string.empty_state_shortcuts_instructions),
-        )
+        if (hasMultipleCategories) {
+            EmptyState(
+                description = stringResource(R.string.empty_state_no_shortcuts_in_category),
+            )
+        } else {
+            EmptyState(
+                title = stringResource(R.string.empty_state_shortcuts),
+                description = stringResource(R.string.empty_state_shortcuts_instructions),
+            )
+        }
     }
 
     val textStyle = TextStyle.Default.runIf(useTextShadows) { copy(shadow = DefaultTextShadow) }
@@ -155,7 +165,11 @@ private fun ShortcutListItem(
         modifier,
     ) {
         ListItem(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .runIf(shortcut.isHidden) {
+                    alpha(HIDDEN_ALPHA)
+                },
             colors = ListItemDefaults.colors(
                 containerColor = Color.Transparent,
             ),
@@ -260,7 +274,10 @@ private fun ShortcutGridItem(
     textStyle: TextStyle,
 ) {
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .runIf(shortcut.isHidden) {
+                alpha(HIDDEN_ALPHA)
+            },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Spacing.SMALL, Alignment.CenterVertically)
     ) {

@@ -1,6 +1,9 @@
 package ch.rmy.android.http_shortcuts.tiles
 
+import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
@@ -18,6 +21,8 @@ import ch.rmy.android.http_shortcuts.activities.misc.quick_settings_tile.QuickSe
 import ch.rmy.android.http_shortcuts.data.domains.shortcuts.ShortcutRepository
 import ch.rmy.android.http_shortcuts.data.enums.ShortcutTriggerType
 import ch.rmy.android.http_shortcuts.data.models.Shortcut
+import ch.rmy.android.http_shortcuts.icons.ShortcutIcon
+import ch.rmy.android.http_shortcuts.utils.IconUtil
 import ch.rmy.android.http_shortcuts.variables.VariableResolver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
@@ -70,7 +75,7 @@ class QuickTileService : TileService() {
             ?.let(::executeShortcut)
             ?: run {
                 if (shortcuts.isNotEmpty() && shortcuts.all { it.canRunWithoutExecuteActivity() }) {
-                    setTheme(R.style.Theme_MaterialComponents_DayNight_NoActionBar)
+                    setTheme(com.google.android.material.R.style.Theme_MaterialComponents_DayNight_NoActionBar)
                     showDialog(
                         AlertDialog.Builder(context)
                             .setItems(shortcuts.map { it.name }.toTypedArray()) { _, index ->
@@ -83,10 +88,21 @@ class QuickTileService : TileService() {
                         .build(context)
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         .let { intent ->
-                            startActivityAndCollapse(intent)
+                            startIntent(intent)
                         }
                 }
             }
+    }
+
+    @Suppress("DEPRECATION")
+    @SuppressLint("StartActivityAndCollapseDeprecated")
+    private fun startIntent(intent: Intent) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            val pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            startActivityAndCollapse(pendingIntent)
+        } else {
+            startActivityAndCollapse(intent)
+        }
     }
 
     private fun executeShortcut(shortcut: Shortcut) {
@@ -115,7 +131,7 @@ class QuickTileService : TileService() {
             .build(context)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             .let { intent ->
-                startActivityAndCollapse(intent)
+                startIntent(intent)
             }
     }
 
@@ -142,9 +158,18 @@ class QuickTileService : TileService() {
         super.onStartListening()
         scope.launch {
             val shortcuts = getShortcuts()
-            qsTile?.label = when (shortcuts.size) {
-                1 -> shortcuts.first().name
-                else -> getString(R.string.action_quick_settings_tile_trigger)
+            val shortcut = shortcuts.singleOrNull()
+            if (shortcut != null) {
+                qsTile?.label = shortcut.name
+                qsTile?.icon = (shortcut.icon as? ShortcutIcon.BuiltInIcon)
+                    ?.takeIf { it.isUsableAsSilhouette }
+                    ?.let {
+                        IconUtil.getIcon(context, it, adaptive = false)
+                    }
+                    ?: Icon.createWithResource(context, R.drawable.ic_quick_settings_tile)
+            } else {
+                qsTile?.label = getString(R.string.action_quick_settings_tile_trigger)
+                qsTile?.icon = Icon.createWithResource(context, R.drawable.ic_quick_settings_tile)
             }
             qsTile?.updateTile()
         }

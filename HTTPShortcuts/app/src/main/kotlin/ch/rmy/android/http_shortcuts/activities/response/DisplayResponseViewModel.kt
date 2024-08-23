@@ -4,10 +4,10 @@ import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.runtime.Stable
+import androidx.lifecycle.viewModelScope
 import ch.rmy.android.framework.extensions.context
 import ch.rmy.android.framework.extensions.logException
 import ch.rmy.android.framework.extensions.logInfo
-import ch.rmy.android.framework.extensions.runIf
 import ch.rmy.android.framework.extensions.runIfNotNull
 import ch.rmy.android.framework.utils.ClipboardUtil
 import ch.rmy.android.framework.viewmodel.BaseViewModel
@@ -15,6 +15,7 @@ import ch.rmy.android.http_shortcuts.R
 import ch.rmy.android.http_shortcuts.activities.execute.ExecutionStarter
 import ch.rmy.android.http_shortcuts.activities.response.models.DetailInfo
 import ch.rmy.android.http_shortcuts.activities.response.models.ResponseData
+import ch.rmy.android.http_shortcuts.activities.response.usecases.GetTableDataUseCase
 import ch.rmy.android.http_shortcuts.data.enums.ShortcutTriggerType
 import ch.rmy.android.http_shortcuts.extensions.readIntoString
 import ch.rmy.android.http_shortcuts.http.HttpStatus
@@ -23,8 +24,11 @@ import ch.rmy.android.http_shortcuts.utils.ActivityProvider
 import ch.rmy.android.http_shortcuts.utils.FileTypeUtil
 import ch.rmy.android.http_shortcuts.utils.FileTypeUtil.isImage
 import ch.rmy.android.http_shortcuts.utils.GsonUtil
+import ch.rmy.android.http_shortcuts.utils.Settings
 import ch.rmy.android.http_shortcuts.utils.ShareUtil
 import ch.rmy.android.http_shortcuts.utils.SizeLimitedReader
+import com.google.gson.JsonParseException
+import com.google.gson.JsonParser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +47,8 @@ constructor(
     private val activityProvider: ActivityProvider,
     private val shareUtil: ShareUtil,
     private val executionStarter: ExecutionStarter,
+    private val settings: Settings,
+    private val getTableData: GetTableDataUseCase,
 ) : BaseViewModel<DisplayResponseViewModel.InitData, DisplayResponseViewState>(application) {
 
     private lateinit var responseData: ResponseData
@@ -64,9 +70,6 @@ constructor(
                 ?: try {
                     withContext(Dispatchers.IO) {
                         responseData.fileUri?.readIntoString(context, CONTENT_SIZE_LIMIT, responseData.charset ?: Charsets.UTF_8)
-                            ?.runIf(responseData.mimeType == FileTypeUtil.TYPE_JSON) {
-                                GsonUtil.tryPrettyPrint(this)
-                            }
                             ?: ""
                     }
                 } catch (e: SizeLimitedReader.LimitReachedException) {
@@ -75,6 +78,35 @@ constructor(
                     ""
                 }
         }
+
+        val isJson = responseData.mimeType == FileTypeUtil.TYPE_JSON
+        var processing = false
+
+        if (isJson) {
+            processing = true
+            viewModelScope.launch {
+                withContext(Dispatchers.Default) {
+                    try {
+                        val json = JsonParser.parseString(responseText)
+                        val table = if (responseData.jsonArrayAsTable) {
+                            getTableData(json)
+                        } else null
+                        updateViewState {
+                            if (table != null) {
+                                copy(tableData = table, processing = false)
+                            } else {
+                                copy(text = GsonUtil.prettyPrintOrThrow(json), processing = false)
+                            }
+                        }
+                    } catch (e: JsonParseException) {
+                        updateViewState {
+                            copy(text = responseText, processing = false)
+                        }
+                    }
+                }
+            }
+        }
+
         return DisplayResponseViewState(
             actions = responseData.actions,
             detailInfo = if (responseData.showDetails) {
@@ -87,6 +119,7 @@ constructor(
                     .takeUnless { !it.hasGeneralInfo && it.headers.isEmpty() }
             } else null,
             monospace = responseData.monospace,
+            fontSize = responseData.fontSize,
             text = responseText,
             fileUri = responseData.fileUri,
             limitExceeded = if (responseTooLarge) CONTENT_SIZE_LIMIT else null,
@@ -95,6 +128,8 @@ constructor(
             canShare = responseData.fileUri != null,
             canCopy = responseText.isNotEmpty() && responseText.length < MAX_COPY_LENGTH,
             canSave = responseData.fileUri != null,
+            showExternalUrlWarning = !settings.isExternalUrlWarningPermanentlyHidden,
+            processing = processing,
         )
     }
 
@@ -174,6 +209,13 @@ constructor(
 
     fun onFilePickerFailed() = runAction {
         showSnackbar(R.string.error_not_supported)
+    }
+
+    fun onExternalUrlWarningHidden(hidden: Boolean) = runAction {
+        updateViewState {
+            copy(showExternalUrlWarning = !hidden)
+        }
+        settings.isExternalUrlWarningPermanentlyHidden = hidden
     }
 
     @Stable

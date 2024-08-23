@@ -3,6 +3,7 @@ A simple but powerful Android app that allows you to create shortcuts and widget
 <a href="https://play.google.com/store/apps/details?id=ch.rmy.android.http_shortcuts"><img alt="Get it on Google Play" src="../assets/play_store.svg" height="80" style="margin-right: 20px"></a><a href="https://f-droid.org/en/packages/ch.rmy.android.http_shortcuts/"><img alt="Get it on F-Droid" src="../assets/f_droid.svg" height="80" style="margin-right: 20px"></a><a href="https://github.com/Waboodoo/HTTP-Shortcuts/releases"><img alt="Get it on Github" src="../assets/github.svg" height="80"></a>
 
 This app is open-source and can be found on [Github](https://github.com/Waboodoo/HTTP-Shortcuts).
+If you find bugs, have questions or feature requests, feel free to [contact me](https://http-shortcuts.rmy.ch/contact).
 
 ## Features
 - Completely free, open-source, no ads and [(almost) no tracking](privacy-policy.md)
@@ -19,16 +20,18 @@ This app is open-source and can be found on [Github](https://github.com/Waboodoo
 - Value injection through [global variables](variables.md) with dynamically determined values (e.g., text, numbers, passwords, selections, colors, dates, …)
 - Run arbitrary [JavaScript](https://http-shortcuts.rmy.ch/scripting) before & after execution, which allows for lots of customization with features such as:
   - compute values such as timestamps, random numbers, UUIDs, hashes, HMACs, base64, etc.
-  - parse JSON or XML and extract data from them
+  - parse JSON, HTML or XML and extract data from it
   - show toast message or message dialogs
   - vibrate or play notification sounds
   - trigger other shortcuts to chain multiple HTTP requests 
   - interact with other devices and services by sending TCP or UDP packets, MQTT messages or using Wake-on-LAN
 - Keep everything organized by categorizing into different tabs
 - Import & Export in JSON or cURL format
-- 3rd party integration (e.g. Tasker)
+- 3rd party integration (e.g. Tasker, Wireguard)
 - Configure it from your browser using the [Web Editor](https://http-shortcuts.rmy.ch/editor)
-- Runs on Android 5 (Lollipop) or newer. For Android 4.0 - Android 4.4.4, download and [install the APK of version 2.9.0](https://github.com/Waboodoo/HTTP-Shortcuts/releases/tag/v2.9.0).
+- Runs on Android 6 (Marshmallow) or newer.
+  - For Android 5, download and [install the APK of version 3.14.0](https://github.com/Waboodoo/HTTP-Shortcuts/releases/tag/v3.14.0).
+  - For Android 4.0 - Android 4.4.4, download and [install the APK of version 2.9.0](https://github.com/Waboodoo/HTTP-Shortcuts/releases/tag/v2.9.0).
 
 ## Screenshots
 ![Main Screen](../assets/screenshots/01.png)

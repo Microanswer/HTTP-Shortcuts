@@ -5,11 +5,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.LiveHelp
 import androidx.compose.material.icons.outlined.BatteryFull
 import androidx.compose.material.icons.outlined.Cookie
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -20,7 +23,6 @@ import ch.rmy.android.http_shortcuts.components.Spacing
 @Composable
 fun TroubleShootingContent(
     batteryOptimizationButtonVisible: Boolean,
-    allowOverlayButtonVisible: Boolean,
     allowXiaomiOverlayButtonVisible: Boolean,
     onEventHistoryClicked: () -> Unit,
     onClearCookiesButtonClicked: () -> Unit,
@@ -28,6 +30,8 @@ fun TroubleShootingContent(
     onAllowOverlayButtonClicked: () -> Unit,
     onAllowXiaomiOverlayButtonClicked: () -> Unit,
     onBatteryOptimizationButtonClicked: () -> Unit,
+    onDocumentationButtonClicked: () -> Unit,
+    onContactButtonClicked: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -52,14 +56,12 @@ fun TroubleShootingContent(
             onClick = onCancelAllPendingExecutionsButtonClicked,
         )
 
-        if (allowOverlayButtonVisible) {
-            SettingsButton(
-                icon = Icons.Outlined.Layers,
-                title = stringResource(R.string.settings_allow_overlay),
-                subtitle = stringResource(R.string.settings_allow_overlay_summary),
-                onClick = onAllowOverlayButtonClicked,
-            )
-        }
+        SettingsButton(
+            icon = Icons.Outlined.Layers,
+            title = stringResource(R.string.settings_allow_overlay),
+            subtitle = stringResource(R.string.settings_allow_overlay_summary),
+            onClick = onAllowOverlayButtonClicked,
+        )
 
         if (allowXiaomiOverlayButtonVisible) {
             SettingsButton(
@@ -78,5 +80,21 @@ fun TroubleShootingContent(
                 onClick = onBatteryOptimizationButtonClicked,
             )
         }
+
+        HorizontalDivider()
+
+        SettingsButton(
+            icon = Icons.AutoMirrored.Outlined.LiveHelp,
+            title = stringResource(R.string.settings_documentation),
+            subtitle = stringResource(R.string.settings_documentation_summary),
+            onClick = onDocumentationButtonClicked,
+        )
+
+        SettingsButton(
+            icon = Icons.Outlined.Email,
+            title = stringResource(R.string.settings_mail),
+            subtitle = stringResource(R.string.settings_mail_summary),
+            onClick = onContactButtonClicked,
+        )
     }
 }

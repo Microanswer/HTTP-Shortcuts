@@ -5,7 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.HelpOutline
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -18,7 +18,6 @@ import ch.rmy.android.http_shortcuts.components.EventHandler
 import ch.rmy.android.http_shortcuts.components.SimpleScaffold
 import ch.rmy.android.http_shortcuts.components.ToolbarIcon
 import ch.rmy.android.http_shortcuts.components.bindViewModel
-import ch.rmy.android.http_shortcuts.import_export.OpenFilePickerForExportContract
 import ch.rmy.android.http_shortcuts.navigation.NavigationDestination.RemoteEdit.RESULT_CHANGES_IMPORTED
 import ch.rmy.android.http_shortcuts.navigation.ResultHandler
 
@@ -43,24 +42,12 @@ fun ImportExportScreen(
         }
     }
 
-    val openFilePickerForExport = rememberLauncherForActivityResult(OpenFilePickerForExportContract) { fileUri ->
-        fileUri?.let(viewModel::onFilePickedForExport)
-    }
     val openFilePickerForImport = rememberLauncherForActivityResult(FilePickerUtil.PickFile) { fileUri ->
         fileUri?.let(viewModel::onFilePickedForImport)
     }
 
     EventHandler { event ->
         when (event) {
-            is ImportExportEvent.OpenFilePickerForExport -> consume {
-                try {
-                    openFilePickerForExport.launch(
-                        OpenFilePickerForExportContract.Params()
-                    )
-                } catch (e: ActivityNotFoundException) {
-                    context.showToast(R.string.error_not_supported)
-                }
-            }
             is ImportExportEvent.OpenFilePickerForImport -> consume {
                 try {
                     openFilePickerForImport.launch(null)
@@ -77,7 +64,7 @@ fun ImportExportScreen(
         title = stringResource(R.string.title_import_export),
         actions = {
             ToolbarIcon(
-                Icons.Outlined.HelpOutline,
+                Icons.AutoMirrored.Filled.HelpOutline,
                 contentDescription = stringResource(R.string.button_show_help),
                 onClick = viewModel::onHelpButtonClicked,
             )
@@ -87,7 +74,8 @@ fun ImportExportScreen(
             exportEnabled = viewState.exportEnabled,
             onImportFromFileClicked = viewModel::onImportFromFileButtonClicked,
             onImportFromUrlClicked = viewModel::onImportFromURLButtonClicked,
-            onExportClicked = viewModel::onExportButtonClicked,
+            onExportToFileClicked = viewModel::onExportToFileButtonClicked,
+            onExportViaShareClicked = viewModel::onExportViaShareButtonClicked,
             onRemoteEditButtonClicked = viewModel::onRemoteEditButtonClicked,
         )
     }
@@ -95,9 +83,6 @@ fun ImportExportScreen(
     ImportExportDialog(
         state?.dialogState,
         onImportFromUrl = viewModel::onImportFromUrlDialogSubmitted,
-        onShortcutsSelectedForExport = viewModel::onShortcutsForExportSelected,
         onDismissRequest = viewModel::onDialogDismissalRequested,
-        onExportToFileOptionSelected = viewModel::onExportToFileOptionSelected,
-        onExportViaSharingOptionSelected = viewModel::onExportViaSharingOptionSelected,
     )
 }

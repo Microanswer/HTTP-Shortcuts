@@ -34,7 +34,7 @@ sealed interface ShortcutIcon {
                     matchResult.groupValues[2]
                         .hexStringToColorInt()
                 }
-                ?: Icons.TintColor.values()
+                ?: Icons.TintColor.entries
                     .firstOrNull {
                         iconName.startsWith(it.prefix)
                     }
@@ -46,6 +46,25 @@ sealed interface ShortcutIcon {
                     }
         }
 
+        val hasBackground: Boolean
+            get() = iconName.startsWith("flat_") ||
+                iconName in ICONS_WITH_BACKGROUND
+
+        val isUsableAsSilhouette
+            get() = iconName.run {
+                startsWith("bitsies_") || startsWith("black_") ||
+                    (
+                        startsWith("freepik_") && this !in arrayOf(
+                            "freepik_accept",
+                            "freepik_add",
+                            "freepik_minus",
+                            "freepik_cancel",
+                            "freepik_heart",
+                            "freepik_rate"
+                        )
+                        )
+            }
+
         @DrawableRes
         fun getDrawableIdentifier(context: Context): Int =
             context.resources.getIdentifier(
@@ -54,9 +73,9 @@ sealed interface ShortcutIcon {
                 context.packageName,
             )
                 .takeUnless { it == 0 }
-                ?: NoIcon.ICON_RESOURCE
+                ?: NoIcon.iconResource
 
-        private val normalizedIconName: String = run {
+        val normalizedIconName: String = run {
             iconName
                 .run {
                     COLOR_SUFFIX_REGEX.matchEntire(this)
@@ -65,7 +84,7 @@ sealed interface ShortcutIcon {
                         }
                         ?: this
                 }
-                .runFor(Icons.TintColor.values().asIterable()) { tintColor ->
+                .runFor(Icons.TintColor.entries.asIterable()) { tintColor ->
                     runIf(startsWith(tintColor.prefix)) {
                         replacePrefix(tintColor.prefix, Icons.DEFAULT_TINT_PREFIX)
                     }
@@ -75,6 +94,15 @@ sealed interface ShortcutIcon {
                         "black_circle"
                     } else this
                 }
+        }
+
+        val plainName: String by lazy(LazyThreadSafetyMode.NONE) {
+            var name = normalizedIconName
+            Icons.PREFIXES.forEach { prefix ->
+                name = name.removePrefix(prefix)
+            }
+            name.filter { it.isLetter() || it == '_' }
+                .trimEnd('_')
         }
 
         override fun toString() = iconName
@@ -121,6 +149,21 @@ sealed interface ShortcutIcon {
                 "white" to 0xFFFFFF,
                 "grey" to 0x888888,
             )
+
+            private val ICONS_WITH_BACKGROUND = arrayOf(
+                "freepik_modem",
+                "freepik_print",
+                "freepik_tv",
+                "freepik_projector",
+                "freepik_check",
+                "freepik_close",
+                "freepik_accept",
+                "freepik_add",
+                "freepik_minus",
+                "freepik_cancel",
+                "freepik_heart",
+                "freepik_rate",
+            )
         }
     }
 
@@ -157,6 +200,9 @@ sealed interface ShortcutIcon {
                 null
             }
 
+        override val isCircular: Boolean
+            get() = fileName.contains(IconUtil.CUSTOM_CIRCULAR_ICON_NAME_SUFFIX)
+
         override fun toString() = fileName
 
         override fun equals(other: Any?) =
@@ -171,9 +217,10 @@ sealed interface ShortcutIcon {
         override fun toString() = ""
 
         override fun getIconURI(context: Context, external: Boolean): Uri =
-            getDrawableUri(context, ICON_RESOURCE)
+            getDrawableUri(context, iconResource)
 
-        const val ICON_RESOURCE = R.drawable.ic_launcher
+        val iconResource
+            get() = R.drawable.ic_launcher
 
         override fun equals(other: Any?) =
             other is NoIcon
@@ -183,6 +230,9 @@ sealed interface ShortcutIcon {
     }
 
     fun getIconURI(context: Context, external: Boolean = false): Uri
+
+    val isCircular: Boolean
+        get() = false
 
     companion object {
         fun fromName(iconName: String?): ShortcutIcon =

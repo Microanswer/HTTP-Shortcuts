@@ -21,13 +21,16 @@ import ch.rmy.android.http_shortcuts.activities.editor.basicsettings.BasicReques
 import ch.rmy.android.http_shortcuts.activities.editor.body.RequestBodyScreen
 import ch.rmy.android.http_shortcuts.activities.editor.executionsettings.ExecutionSettingsScreen
 import ch.rmy.android.http_shortcuts.activities.editor.headers.RequestHeadersScreen
+import ch.rmy.android.http_shortcuts.activities.editor.response.ResponseDisplayScreen
 import ch.rmy.android.http_shortcuts.activities.editor.response.ResponseScreen
 import ch.rmy.android.http_shortcuts.activities.editor.scripting.ScriptingScreen
 import ch.rmy.android.http_shortcuts.activities.editor.scripting.codesnippets.CodeSnippetPickerScreen
 import ch.rmy.android.http_shortcuts.activities.editor.shortcuts.TriggerShortcutsScreen
+import ch.rmy.android.http_shortcuts.activities.editor.typepicker.TypePickerScreen
 import ch.rmy.android.http_shortcuts.activities.globalcode.GlobalScriptingScreen
 import ch.rmy.android.http_shortcuts.activities.history.HistoryScreen
 import ch.rmy.android.http_shortcuts.activities.icons.IconPickerScreen
+import ch.rmy.android.http_shortcuts.activities.importexport.ExportScreen
 import ch.rmy.android.http_shortcuts.activities.importexport.ImportExportScreen
 import ch.rmy.android.http_shortcuts.activities.main.MainActivity
 import ch.rmy.android.http_shortcuts.activities.main.MainScreen
@@ -38,6 +41,7 @@ import ch.rmy.android.http_shortcuts.activities.troubleshooting.TroubleShootingS
 import ch.rmy.android.http_shortcuts.activities.variables.VariablesScreen
 import ch.rmy.android.http_shortcuts.activities.variables.editor.VariableEditorScreen
 import ch.rmy.android.http_shortcuts.activities.widget.WidgetSettingsScreen
+import ch.rmy.android.http_shortcuts.activities.workingdirectories.WorkingDirectoriesScreen
 import ch.rmy.android.http_shortcuts.widget.WidgetManager
 
 @Composable
@@ -87,6 +91,7 @@ fun NavigationRoot() {
             CodeSnippetPickerScreen(
                 backStackEntry.savedStateHandle,
                 currentShortcutId = NavigationDestination.CodeSnippetPicker.extractShortcutId(backStackEntry.arguments!!),
+                includeSuccessOptions = NavigationDestination.CodeSnippetPicker.extractIncludeSuccessOptions(backStackEntry.arguments!!),
                 includeResponseOptions = NavigationDestination.CodeSnippetPicker.extractIncludeResponseOptions(backStackEntry.arguments!!),
                 includeNetworkErrorOption = NavigationDestination.CodeSnippetPicker.extractIncludeNetworkErrorOption(backStackEntry.arguments!!),
             )
@@ -127,8 +132,16 @@ fun NavigationRoot() {
             )
         }
 
-        composable(NavigationDestination.MoveShortcuts) {
-            MoveScreen()
+        composable(NavigationDestination.Export) { backStackEntry ->
+            ExportScreen(
+                toFile = NavigationDestination.Export.extractToFile(backStackEntry.arguments!!),
+            )
+        }
+
+        composable(NavigationDestination.MoveShortcuts) { backStackEntry ->
+            MoveScreen(
+                initialShortcut = NavigationDestination.MoveShortcuts.extractShortcutId(backStackEntry.arguments!!)
+            )
         }
 
         composable(NavigationDestination.RemoteEdit) {
@@ -137,6 +150,10 @@ fun NavigationRoot() {
 
         composable(NavigationDestination.Settings) {
             SettingsScreen()
+        }
+
+        composable(NavigationDestination.TypePicker) { backStackEntry ->
+            TypePickerScreen(categoryId = NavigationDestination.TypePicker.extractCategoryId(backStackEntry.arguments!!))
         }
 
         composable(NavigationDestination.ShortcutEditor) { backStackEntry ->
@@ -174,8 +191,14 @@ fun NavigationRoot() {
             RequestHeadersScreen()
         }
 
-        composable(NavigationDestination.ShortcutEditorResponse) {
-            ResponseScreen()
+        composable(NavigationDestination.ShortcutEditorResponse) { backStackEntry ->
+            ResponseScreen(
+                savedStateHandle = backStackEntry.savedStateHandle,
+            )
+        }
+
+        composable(NavigationDestination.ShortcutEditorResponseDisplay) {
+            ResponseDisplayScreen()
         }
 
         composable(NavigationDestination.ShortcutEditorScripting) { backStackEntry ->
@@ -211,6 +234,12 @@ fun NavigationRoot() {
                 shortcutId = NavigationDestination.Widget.extractShortcutId(backStackEntry.arguments!!),
                 shortcutName = NavigationDestination.Widget.extractShortcutName(backStackEntry.arguments!!),
                 shortcutIcon = NavigationDestination.Widget.extractShortcutIcon(backStackEntry.arguments!!),
+            )
+        }
+
+        composable(NavigationDestination.WorkingDirectories) { backStackEntry ->
+            WorkingDirectoriesScreen(
+                picker = NavigationDestination.WorkingDirectories.extractPicker(backStackEntry.arguments!!),
             )
         }
     }

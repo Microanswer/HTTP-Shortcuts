@@ -1,6 +1,8 @@
 package ch.rmy.android.http_shortcuts.variables
 
+import ch.rmy.android.framework.extensions.logInfo
 import ch.rmy.android.framework.extensions.runIf
+import ch.rmy.android.framework.extensions.tryOrLog
 import ch.rmy.android.http_shortcuts.data.domains.variables.VariableId
 import ch.rmy.android.http_shortcuts.data.domains.variables.VariableKey
 import ch.rmy.android.http_shortcuts.data.domains.variables.VariableKeyOrId
@@ -12,9 +14,11 @@ import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 
 class VariableManager(
-    val variables: List<Variable>,
+    variables: List<Variable>,
     preResolvedValues: Map<VariableKey, String> = emptyMap(),
 ) : VariableLookup {
+
+    val variables: List<Variable>
 
     private val variablesById: Map<VariableId, Variable>
 
@@ -24,6 +28,7 @@ class VariableManager(
 
     init {
         val detachedVariables = variables.map { if (it.isManaged()) it.copyFromRealm() else it }
+        this.variables = variables
         variablesById = detachedVariables.associateBy { it.id }
         variablesByKey = detachedVariables.associateBy { it.key }
 
@@ -62,7 +67,10 @@ class VariableManager(
             }
 
     fun setVariableValue(variable: Variable, value: String, storeOnly: Boolean = false) {
-        variable.value = value
+        tryOrLog {
+            logInfo("Updating variable in-memory, managed = ${variable.isManaged()}")
+            variable.value = value
+        }
         if (!storeOnly) {
             variableValuesById[variable.id] = encodeValue(variable, value)
         }

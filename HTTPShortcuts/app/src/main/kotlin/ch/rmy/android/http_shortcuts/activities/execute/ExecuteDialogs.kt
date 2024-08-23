@@ -31,13 +31,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isUnspecified
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import ch.rmy.android.framework.extensions.runIf
 import ch.rmy.android.http_shortcuts.R
 import ch.rmy.android.http_shortcuts.components.ColorPickerDialog
 import ch.rmy.android.http_shortcuts.components.ConfirmDialog
 import ch.rmy.android.http_shortcuts.components.FontSize
+import ch.rmy.android.http_shortcuts.components.HideableDialog
 import ch.rmy.android.http_shortcuts.components.HtmlRichText
 import ch.rmy.android.http_shortcuts.components.MessageDialog
 import ch.rmy.android.http_shortcuts.components.MultiSelectDialog
@@ -92,6 +96,14 @@ private fun ExecuteDialog(
                 title = dialogState.title?.localize(),
                 message = dialogState.message.localize(),
                 onDismissRequest = onDismissed,
+            )
+        }
+        is ExecuteDialogState.Warning -> {
+            HideableDialog(
+                title = dialogState.title?.localize(),
+                message = dialogState.message.localize(),
+                onHidden = dialogState.onHidden,
+                onDismissed = onDismissed,
             )
         }
         is ExecuteDialogState.GenericConfirm -> {
@@ -249,6 +261,7 @@ private fun ExecuteDialog(
                 content = dialogState.content,
                 action = dialogState.action,
                 monospace = dialogState.monospace,
+                fontSize = dialogState.fontSize?.sp ?: TextUnit.Unspecified,
                 onActionButtonClicked = {
                     onResult(Unit)
                 },
@@ -365,6 +378,7 @@ private fun ShowResultDialog(
     content: ExecuteDialogState.ShowResult.Content,
     action: ResponseDisplayAction?,
     monospace: Boolean,
+    fontSize: TextUnit,
     onActionButtonClicked: () -> Unit,
     onDismissed: () -> Unit,
 ) {
@@ -388,6 +402,8 @@ private fun ShowResultDialog(
                             Text(
                                 text = content.text,
                                 fontFamily = if (monospace) FontFamily.Monospace else null,
+                                fontSize = fontSize,
+                                lineHeight = if (fontSize.isUnspecified) TextUnit.Unspecified else fontSize * 1.2f,
                             )
                         }
                     }

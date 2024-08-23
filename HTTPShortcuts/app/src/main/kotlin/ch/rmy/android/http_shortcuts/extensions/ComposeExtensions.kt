@@ -3,10 +3,8 @@ package ch.rmy.android.http_shortcuts.extensions
 import android.content.Context
 import android.os.Bundle
 import android.webkit.WebView
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -15,13 +13,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import ch.rmy.android.framework.utils.localization.Localizable
-import ch.rmy.android.http_shortcuts.utils.SyntaxHighlighter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 val shortTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
 val mediumTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM)
+val mediumDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
 
 @Stable
 @Composable
@@ -35,6 +33,10 @@ fun LocalDateTime.formatShortTime(): String =
 @Stable
 fun LocalDateTime.formatMediumTime(): String =
     mediumTimeFormatter.format(this)
+
+@Stable
+fun LocalDateTime.formatMediumDateTime(): String =
+    mediumDateTimeFormatter.format(this)
 
 @Composable
 fun <T : WebView> rememberWebView(key: String, init: (Context, isRestore: Boolean) -> T): T {
@@ -60,19 +62,12 @@ fun <T : WebView> rememberWebView(key: String, init: (Context, isRestore: Boolea
     return webView
 }
 
-@Composable
-fun rememberSyntaxHighlighter(language: String): SyntaxHighlighter {
-    val useDarkTheme = isSystemInDarkTheme()
-    return remember(language, useDarkTheme) {
-        SyntaxHighlighter(language, useDarkTheme)
-    }
-}
-
 fun TextFieldValue.insertAtCursor(before: String, after: String): TextFieldValue {
-    val position = selection.end
+    val position = selection.min
     return copy(
         text = text.take(position) + before + after + text.drop(position),
         selection = TextRange(position + before.length),
+        composition = null,
     )
 }
 

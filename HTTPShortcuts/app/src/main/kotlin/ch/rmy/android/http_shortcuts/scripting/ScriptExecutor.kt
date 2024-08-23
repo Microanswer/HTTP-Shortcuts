@@ -5,8 +5,10 @@ import ch.rmy.android.framework.extensions.logInfo
 import ch.rmy.android.framework.extensions.resume
 import ch.rmy.android.http_shortcuts.activities.execute.DialogHandle
 import ch.rmy.android.http_shortcuts.data.domains.shortcuts.ShortcutId
+import ch.rmy.android.http_shortcuts.data.models.Category
 import ch.rmy.android.http_shortcuts.data.models.Shortcut
 import ch.rmy.android.http_shortcuts.exceptions.JavaScriptException
+import ch.rmy.android.http_shortcuts.exceptions.TreatAsFailureException
 import ch.rmy.android.http_shortcuts.exceptions.UserAbortException
 import ch.rmy.android.http_shortcuts.http.ErrorResponse
 import ch.rmy.android.http_shortcuts.http.FileUploadManager
@@ -45,10 +47,13 @@ constructor(
             }
     }
 
+    private val cleanupHandler = CleanupHandler()
+
     private var lastException: Throwable? = null
 
     suspend fun initialize(
         shortcut: Shortcut,
+        category: Category,
         variableManager: VariableManager,
         fileUploadResult: FileUploadManager.Result?,
         resultHandler: ResultHandler,
@@ -56,7 +61,7 @@ constructor(
         recursionDepth: Int = 0,
     ) {
         runWithExceptionHandling {
-            registerShortcut(shortcut)
+            registerShortcut(shortcut, category)
             registerFiles(fileUploadResult)
             registerActions(shortcut.id, variableManager, resultHandler, dialogHandle, recursionDepth)
         }
@@ -65,6 +70,9 @@ constructor(
     private suspend fun runWithExceptionHandling(block: () -> Unit) {
         try {
             suspendCancellableCoroutine<Unit> { continuation ->
+                continuation.invokeOnCancellation {
+                    cleanupHandler.finally()
+                }
                 jsContext.setExceptionHandler { exception ->
                     if (continuation.isActive) {
                         continuation.resumeWithException(lastException ?: exception)
@@ -87,6 +95,8 @@ constructor(
                 is JSONException -> JavaScriptException(e)
                 else -> e
             }
+        } finally {
+            cleanupHandler.finally()
         }
     }
 
@@ -107,13 +117,18 @@ constructor(
         }
     }
 
-    private fun registerShortcut(shortcut: Shortcut) {
+    private fun registerShortcut(shortcut: Shortcut, category: Category) {
         jsContext.property(
             "shortcut",
             mapOf(
                 "id" to shortcut.id,
                 "name" to shortcut.name,
                 "description" to shortcut.description,
+                "hidden" to shortcut.hidden,
+                "category" to mapOf(
+                    "id" to category.id,
+                    "name" to category.name,
+                ),
             ),
             READ_ONLY,
         )
@@ -155,11 +170,11 @@ constructor(
         jsContext.evaluateScript(
             """
             function abort() {
-                __abort(false);
+                __abort(0);
                 throw "Abort";
             }
             function abortAll() {
-                __abort(true);
+                __abort(1);
                 throw "Abort";
             }
             """.trimIndent()
@@ -169,11 +184,26 @@ constructor(
             object : JSFunction(jsContext, "run") {
                 @Suppress("unused")
                 @Keep
-                fun run(abortAll: Boolean) {
-                    lastException = UserAbortException(abortAll = abortAll)
+                fun run(abortType: Int, message: String?) {
+                    lastException = when (abortType) {
+                        2 -> TreatAsFailureException(message?.takeUnless { it == "undefined" })
+                        1 -> UserAbortException(abortAll = true)
+                        else -> UserAbortException(abortAll = false)
+                    }
                 }
             },
             READ_ONLY,
+        )
+    }
+
+    fun registerAbortAndTreatAsFailure() {
+        jsContext.evaluateScript(
+            """
+            function abortAndTreatAsFailure(message) {
+                __abort(2, message);
+                throw "Abort";
+            }
+            """.trimIndent()
         )
     }
 
@@ -224,6 +254,11 @@ constructor(
                                     resultHandler = resultHandler,
                                     recursionDepth = recursionDepth,
                                     dialogHandle = dialogHandle,
+                                    cleanupHandler = cleanupHandler,
+                                    onException = { e ->
+                                        lastException = e
+                                        throw e
+                                    }
                                 )
                             )
                         }

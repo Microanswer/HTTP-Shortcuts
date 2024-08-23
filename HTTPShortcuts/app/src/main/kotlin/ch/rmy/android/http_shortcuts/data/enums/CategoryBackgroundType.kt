@@ -11,8 +11,8 @@ sealed interface CategoryBackgroundType {
 
     val useTextShadow: Boolean
 
-    object Default : CategoryBackgroundType {
-        const val VALUE = "default"
+    data object Default : CategoryBackgroundType {
+        private const val VALUE = "default"
 
         override fun serialize() = VALUE
 

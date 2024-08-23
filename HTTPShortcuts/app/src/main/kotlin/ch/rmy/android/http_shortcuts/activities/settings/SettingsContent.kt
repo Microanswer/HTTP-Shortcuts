@@ -1,6 +1,7 @@
 package ch.rmy.android.http_shortcuts.activities.settings
 
 import android.os.Build
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,9 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.LockReset
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.Security
+import androidx.compose.material.icons.outlined.PermDeviceInformation
+import androidx.compose.material.icons.outlined.RemoveRedEye
+import androidx.compose.material.icons.outlined.Science
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.Title
 import androidx.compose.material.icons.outlined.TouchApp
@@ -24,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import ch.rmy.android.http_shortcuts.R
+import ch.rmy.android.http_shortcuts.components.HelpText
 import ch.rmy.android.http_shortcuts.components.SettingsButton
 import ch.rmy.android.http_shortcuts.components.SettingsGroup
 import ch.rmy.android.http_shortcuts.components.SettingsSelection
@@ -40,8 +45,10 @@ fun SettingsContent(
     selectedLanguage: String?,
     selectedDarkModeOption: String,
     crashReportingEnabled: Boolean,
+    deviceId: String,
     colorTheme: String,
     experimentalExecutionModeEnabled: Boolean,
+    showHiddenShortcuts: Boolean,
     selectedClickActionOption: ShortcutClickBehavior,
     onLanguageSelected: (String?) -> Unit,
     onDarkModeOptionSelected: (String) -> Unit,
@@ -54,7 +61,9 @@ fun SettingsContent(
     onCertificatePinningButtonClicked: () -> Unit,
     onGlobalScriptingButtonClicked: () -> Unit,
     onCrashReportingChanged: (Boolean) -> Unit,
+    onDeviceIdButtonClicked: () -> Unit,
     onColorThemeChanged: (String) -> Unit,
+    onShowHiddenShortcutsChanged: (Boolean) -> Unit,
     onExperimentalExecutionModeChanged: (Boolean) -> Unit,
     onExperimentalHelpTextClicked: () -> Unit,
 ) {
@@ -169,6 +178,17 @@ fun SettingsContent(
             title = stringResource(R.string.settings_title_global_shortcut_settings),
         ) {
             SettingsSelection(
+                icon = Icons.Outlined.RemoveRedEye,
+                title = stringResource(R.string.settings_title_show_hidden_shortcuts),
+                selectedKey = showHiddenShortcuts,
+                items = listOf(
+                    false to stringResource(R.string.settings_option_hide_hidden_shortcuts),
+                    true to stringResource(R.string.settings_option_show_hidden_shortcuts),
+                ),
+                onItemSelected = onShowHiddenShortcutsChanged,
+            )
+
+            SettingsSelection(
                 icon = Icons.Outlined.TouchApp,
                 title = stringResource(R.string.settings_click_behavior),
                 selectedKey = selectedClickActionOption,
@@ -215,9 +235,16 @@ fun SettingsContent(
                     onItemSelected = onCrashReportingChanged,
                 )
             }
+
+            SettingsButton(
+                icon = Icons.Outlined.PermDeviceInformation,
+                title = stringResource(R.string.settings_device_id),
+                subtitle = stringResource(R.string.settings_device_id_summary, deviceId),
+                enabled = crashReportingEnabled,
+                onClick = onDeviceIdButtonClicked,
+            )
         }
 
-        /*
         SettingsGroup(
             title = stringResource(R.string.settings_title_experimental),
         ) {
@@ -242,6 +269,5 @@ fun SettingsContent(
                 onItemSelected = onExperimentalExecutionModeChanged,
             )
         }
-         */
     }
 }

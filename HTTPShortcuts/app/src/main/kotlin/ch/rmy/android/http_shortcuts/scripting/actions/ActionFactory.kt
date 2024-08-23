@@ -12,6 +12,7 @@ import ch.rmy.android.http_shortcuts.scripting.actions.types.DialogActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.EnqueueShortcutActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.ExecuteShortcutActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.GetClipboardContentActionType
+import ch.rmy.android.http_shortcuts.scripting.actions.types.GetDirectoryActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.GetLocationActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.GetVariableActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.HashActionType
@@ -19,6 +20,7 @@ import ch.rmy.android.http_shortcuts.scripting.actions.types.HmacActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.LogEventActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.OpenAppActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.OpenURLActionType
+import ch.rmy.android.http_shortcuts.scripting.actions.types.ParseHTMLActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.ParseXMLActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.PlaySoundActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.PromptActionType
@@ -35,7 +37,9 @@ import ch.rmy.android.http_shortcuts.scripting.actions.types.SendMQTTMessagesAct
 import ch.rmy.android.http_shortcuts.scripting.actions.types.SendTCPPacketActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.SendUDPPacketActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.SetResultActionType
+import ch.rmy.android.http_shortcuts.scripting.actions.types.SetShortcutHiddenActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.SetVariableActionType
+import ch.rmy.android.http_shortcuts.scripting.actions.types.SetWireguardTunnelStateActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.ShareTextActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.TextToSpeechActionType
 import ch.rmy.android.http_shortcuts.scripting.actions.types.ToHexStringActionType
@@ -65,6 +69,7 @@ constructor(
     enqueueShortcutActionType: EnqueueShortcutActionType,
     executeShortcutActionType: ExecuteShortcutActionType,
     getClipboardContentActionType: GetClipboardContentActionType,
+    getDirectoryActionType: GetDirectoryActionType,
     getLocationActionType: GetLocationActionType,
     getVariableActionType: GetVariableActionType,
     hashActionType: HashActionType,
@@ -72,6 +77,7 @@ constructor(
     logEventActionType: LogEventActionType,
     openAppActionType: OpenAppActionType,
     openURLActionType: OpenURLActionType,
+    parseHTMLActionType: ParseHTMLActionType,
     parseXMLActionType: ParseXMLActionType,
     playSoundActionType: PlaySoundActionType,
     promptActionType: PromptActionType,
@@ -87,8 +93,10 @@ constructor(
     sendMQTTMessagesActionType: SendMQTTMessagesActionType,
     sendTCPPacketActionType: SendTCPPacketActionType,
     sendUDPPacketActionType: SendUDPPacketActionType,
+    setShortcutHiddenActionType: SetShortcutHiddenActionType,
     setResultActionType: SetResultActionType,
     setVariableActionType: SetVariableActionType,
+    setWireguardTunnelStateActionType: SetWireguardTunnelStateActionType,
     shareTextActionType: ShareTextActionType,
     textToSpeechActionType: TextToSpeechActionType,
     toastActionType: ToastActionType,
@@ -119,6 +127,7 @@ constructor(
             changeIconActionType,
             confirmActionType,
             copyToClipboardActionType,
+            getDirectoryActionType,
             dialogActionType,
             enqueueShortcutActionType,
             executeShortcutActionType,
@@ -130,6 +139,7 @@ constructor(
             logEventActionType,
             openAppActionType,
             openURLActionType,
+            parseHTMLActionType,
             parseXMLActionType,
             playSoundActionType,
             promptActionType,
@@ -145,8 +155,10 @@ constructor(
             sendMQTTMessagesActionType,
             sendTCPPacketActionType,
             sendUDPPacketActionType,
+            setShortcutHiddenActionType,
             setResultActionType,
             setVariableActionType,
+            setWireguardTunnelStateActionType,
             shareTextActionType,
             textToSpeechActionType,
             toastActionType,

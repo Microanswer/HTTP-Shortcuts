@@ -60,10 +60,8 @@
     <string name="action_delete">מחק</string>
     <!-- Shortcut dropdown option: export the shortcut -->
     <string name="action_export">ייצא</string>
-    <!-- Dialog button: Confirm exporting the selected shortcuts -->
+    <!-- Menu button: Confirm exporting the selected shortcuts -->
     <string name="dialog_button_export">יְצוּא</string>
-    <!-- Dialog title: shown in dialog when selecting which shortcuts to export -->
-    <string name="dialog_title_select_shortcuts_for_export">בחר קיצורי דרך</string>
     <!-- Shortcut dropdown option: display information about the shortcut -->
     <string name="action_shortcut_information">הצג מידע</string>
     <!-- Shortcut dropdown option: Move the shortcut (up, down, or to different category) -->
@@ -82,6 +80,7 @@
     <string name="empty_state_shortcuts_instructions">קיצור דרך מאפשר לך לשלוח בקשת HTTP, לעבד ולהציג את התגובה.
 
 לחץ על כפתור ה+ על מנת להתחיל, או בדוק את התיעוד בסעיף האודות.</string>
+    <!-- Empty state, shown in list when there are no shortcuts yet, but the user already knows how to create shortcuts / categories -->
     <!-- Empty state, shown in list of trigger shortcuts (multi-shortcut) when there are no shortcuts added yet -->
     <string name="empty_state_trigger_shortcuts">עדיין לא הוספת קיצורי דרך להפעלה.</string>
     <!-- Empty state instructions, shown in trigger shortcuts list (multi-shortcut) when there are no shortcuts added yet -->
@@ -106,6 +105,7 @@
     <string name="executed">%s בוצע.</string>
     <!-- Error message shown in Toast when shortcut on home screen was clicked but the corresponding data was not found (i.e. might have been deleted). -->
     <string name="shortcut_not_found">קיצור דרך לא נמצא. ייתכן שתצטרך להוסיף אותו מחדש למסך הבית.</string>
+    <!-- Error message shown when a user clicks a shortcut that was pinned to the home screen, but the shortcut no longer exists because it was deleted. -->
     <!-- Validation error, shown when user tries to save a shortcut without a name -->
     <string name="validation_name_not_empty">נא להכניס את השם.</string>
     <!-- Validation error, shown when user tries to save a shortcut without a valid URL -->
@@ -150,8 +150,6 @@
     <string name="dialog_ok">אישור</string>
     <!-- Generic button: Cancel -->
     <string name="dialog_cancel">ביטול</string>
-    <!-- Generic button: Help (to open documentation) -->
-    <string name="dialog_help">עזרה</string>
     <!-- Generic button: remove -->
     <string name="dialog_remove">הסר</string>
     <!-- Section title in shortcut editor, for section that contains options to specify the headers of the HTTP request -->
@@ -215,8 +213,8 @@
     <string name="settings_import_from_file">ייבוא מקובץ</string>
     <!-- Button in settings page to start import of shortcuts from a url -->
     <string name="settings_import_from_url">ייבוא מכתובת URL</string>
-    <!-- Button in settings page to start export of shortcuts -->
-    <string name="settings_export">ייצא קיצורי דרך ומשתנים</string>
+    <!-- Button on Import&Export screen to lets the user export shortcuts into a file -->
+    <!-- Button on Import&Export screen to lets the user export shortcuts via the share dialog -->
     <!-- Button in settings page to start editing shortcuts from a connected computer -->
     <string name="settings_remote_edit">ערוך במחשב</string>
     <!-- Success message, shown in snackbar when export of shortcuts is successful -->
@@ -266,6 +264,7 @@
     <string name="label_subtitle_client_cert_in_use">משתמש בתעודה \"%s\". לחץ כדי להסיר.</string>
     <!-- Subtitle for button to select a client certificate, when a file based certificate has been selected -->
     <string name="label_subtitle_client_cert_file_in_use">משתמש בקובץ תעודה. לחץ כדי להסיר.</string>
+    <!-- Subtitle for button to select a client certificate, when it is disabled because the shortcut uses HTTP instead of HTTPS -->
     <!-- Title for dialog, when selecting a client certificate -->
     <string name="title_client_cert">תעודת לקוח</string>
     <!-- Label, for option in dialog to pick a client certificate managed by the operating system -->
@@ -470,6 +469,8 @@
     <string name="variable_type_toggle">מתג</string>
     <!-- Description for type of variable: Toggle, i.e., a variable that toggles/switches/iterates between multiple values when invoked -->
     <string name="variable_type_toggle_description">עובר לערך שונה בכל פעם בשימוש</string>
+    <!-- Type of variable: Increment, i.e., a variable that increases a counter by 1 and return the new value when invoked -->
+    <!-- Description for type of variable: Increment, i.e., a variable that increases a counter by 1 and return the new value when invoked -->
     <!-- Type of variable: UUID, i.e., a variable which will generate a random UUID (Universally Unique Identifier) as its value when used -->
     <!-- Description for type of variable: UUID, i.e., a variable which will generate a random UUID (Universally Unique Identifier) as its value when used -->
     <string name="variable_type_uuid_description">יוצר UUID אקראי חדש בכל ביצוע</string>
@@ -501,6 +502,8 @@
     <string name="label_url_encode">קידוד URL</string>
     <!-- Checkbox label, for option to enable JSON encoding of a variable -->
     <string name="label_json_encode">קידוד JSON</string>
+    <!-- Checkbox label, for option to enable/disable the exclusion of a variable's value in exports -->
+    <!-- Instructions shown below the "IExclude stored value from exports" checkbox in the variable editor -->
     <!-- Section title, for section containing basic settings for a shortcut -->
     <string name="section_basic_variable_settings">הגדרות בסיסיות</string>
     <!-- Error message, informing user that the entered variable name is empty -->
@@ -597,10 +600,11 @@
     <string name="button_export_to_general">מסמכים (אחסן קובץ)</string>
     <!-- Dialog option on Export dialog, for exporting by sharing text to another app -->
     <string name="button_export_send_to">יישומן אחר (שתף)</string>
-    <!-- Dialog title when creating a new shortcut, shows options below -->
-    <string name="title_create_new_shortcut_options_dialog">צור קיצור דרך חדש</string>
+    <!-- Instruction text, shown at the top of the screen when creating a new shortcut, shows options below -->
     <!-- Option in dialog to create new shortcut: from scratch (i.e., start with a blank editor) -->
     <string name="button_create_new">קיצור דרך HTTP רגיל</string>
+    <!-- Button in shortcut creation screen, to select the type of shortcut: from scratch (i.e., start with a blank editor) -->
+    <!-- Section title, shown on shortcut creation screen, above the section that lets the user pick advanced shortcut types -->
     <!-- Option in dialog to create new shortcut: from cURL command (i.e., parse a cURL command and prepopulate editor) -->
     <string name="button_curl_import">ייבוא מפקודת cURL</string>
     <!-- Option in dialog to create new shortcut: create a browser shortcut, i.e., a shortcut that will open the external browser -->
@@ -631,8 +635,12 @@
     <string name="authentication_bearer">אימות בעזרת טוקן (Bearer)</string>
     <!-- Label for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu, i.e., when long-pressing the app icon on the home screen -->
     <string name="label_launcher_shortcut">הצג כקיצור דרך של יישומן במסך הבית</string>
-    <!-- Label for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu and it will be promoted as a Direct Share target, allowing easy sharing of content into that specific shortcut -->
+    <!-- Subtitle for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu -->
+    <!-- Subtitle for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu -->
     <!-- Label for option in shortcut editor, selecting it will cause a secondary app to appear in the device's launcher. This app will trigger the shortcut -->
+    <!-- Subtitle for option in shortcut editor, selecting it will cause a secondary app to appear in the device's launcher. This app will trigger the shortcut -->
+    <!-- Label for option in shortcut editor, selecting it will enable the shortcut as a file sharing target, meaning it will be possible to share files from outside the app and use them as this shortcut's request body or as a parameter -->
+    <!-- Subtitle for option in shortcut editor, selecting it will enable the shortcut as a file sharing target, meaning it will be possible to share files from outside the app and use them as this shortcut's request body or as a parameter -->
     <!-- Label for option in shortcut editor, selecting it will cause the shortcut to appear as an option in the Quick Settings Tile of the app -->
     <string name="label_quick_tile_shortcut">אפשר הזנקה דרך תפריט הגדרות מהירות</string>
     <!-- error message displayed when something goes wrong (e.g. response too big) when trying to share/export a response/text -->
@@ -760,6 +768,7 @@
     <string name="action_type_change_icon_title">שנה אייקון של קיצור דרך</string>
     <!-- Shortcut Action Title: Change Shortcut Description -->
     <string name="action_type_change_icon_description">שנה את תיאור קיצור הדרך</string>
+    <!-- Shortcut Action Title: Change Shortcut Visibility -->
     <!-- Shortcut Action Title: Enqueue a shortcut, i.e., execute it after the current one finishes -->
     <string name="action_type_trigger_shortcut_title">הזנק קיצור דרך</string>
     <!-- Shortcut Action Title: Execute another shortcut immediately and return its result -->
@@ -786,6 +795,7 @@
     <string name="error_action_type_send_wol_invalid_mac_address">כתובת MAC לא חוקית: %s</string>
     <!-- Shortcut Action Title: Trigger a task in Tasker -->
     <string name="action_type_trigger_tasker_title">הזנק משימה של Tasker</string>
+    <!-- Shortcut Action Title: Enable or disable a tunnel in the Wireguard app -->
     <!-- Shortcut Action Title: Get the device's current (physical) location -->
     <string name="action_type_get_location_title">קבל מיקום נוכחי</string>
     <!-- Shortcut Action Description: Get the device's current (physical) location -->
@@ -799,6 +809,7 @@
     <string name="action_type_send_mqtt_message">שלח הודעת MQTT</string>
     <!-- Shortcut Action Title: Abort the execution of the shortcut -->
     <string name="action_type_abort_execution">בטל ביצוע</string>
+    <!-- Shortcut Action Title: Abort the execution of the shortcut and instead run the steps as if the request had failed -->
     <!-- Shortcut Action Title: Wait for a number of milliseconds before continuing with the script execution -->
     <string name="action_type_wait">המתן</string>
     <!-- Shortcut Action Title: Get the IP Address of the current Wi-Fi -->
@@ -937,7 +948,7 @@
     <string name="title_add_code_snippet">הוסף קטע קוד</string>
     <!-- Dialog option: shown in code snippet picker, shows options to get information about the current shortcut itself -->
     <string name="dialog_code_snippet_shortcut_info">מידע קיצור דרך</string>
-    <!-- Dialog option: shown in code snippet picker, shows options to get information about the selected files -->
+    <!-- Dialog option: shown in code snippet picker, shows options to get information about the selected files and to interact with the file system -->
     <string name="dialog_code_snippet_files">קבצים נבחרים</string>
     <!-- Dialog option: shown in code snippet picker, shows options to get information about the HTTP response -->
     <string name="dialog_code_snippet_handle_response">טפל בתגובה</string>
@@ -957,6 +968,8 @@
     <string name="dialog_code_snippet_network">רֶשֶׁת</string>
     <!-- Dialog option: shown in code snippet picker, option to get the ID of the current shortcut -->
     <string name="dialog_code_snippet_get_shortcut_id">קבל ID של קיצור דרך</string>
+    <!-- Dialog option: shown in code snippet picker, option to read data from a file -->
+    <!-- Dialog option: shown in code snippet picker, option to write data to a file -->
     <!-- Dialog option: shown in code snippet picker, option to get the name of a selected file -->
     <string name="dialog_code_snippet_get_file_name">קבל שם של קובץ נבחר</string>
     <!-- Dialog option: shown in code snippet picker, option to get the type of a selected file -->
@@ -992,6 +1005,7 @@
     <string name="error_shortcut_not_found_for_triggering">לא יכול להזניק קיצור דרך \"%1$s\" בגלל שהוא לא קיים.</string>
     <!-- Error message: Shown in toast when "Rename Shortcut" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
     <string name="error_shortcut_not_found_for_renaming">לא יכול לשנות שם לקיצור דרך \"%1$s\" בגלל שהוא לא קיים.</string>
+    <!-- Error message: Shown in toast when "Set Shortcut Hidden" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
     <!-- Error message: Shown in toast when "Change Icon" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
     <string name="error_shortcut_not_found_for_changing_icon">לא יכול לשנות אייקון של קיצור דרך \"%1$s\" בגלל שהוא לא קיים.</string>
     <!-- Error message: Shown in toast when "Change Description" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
@@ -1053,10 +1067,12 @@
     <string name="error_text_too_long_for_variable">טקסט חורג ממגבלת %d התווים. לא יכול להכניס שומר מקום.</string>
     <!-- Instructions: Shown in toast to inform user that they should select or create a shortcut to be placed on the home screen -->
     <string name="instructions_select_shortcut_for_home_screen">בחר או צור קיצור דרך על מנת למקמו במסך הבית.</string>
+    <!-- Instructions: Shown in info text at the top of the screen to inform user that they should select or create a shortcut, which is then used as by the 3rd party app (e.g. Tasker) -->
     <!-- Label: Shown when user selects a widget to place on the home screen, shown for the customizable widget (as opposite to the generic shortcut) -->
     <string name="label_widget">ווידג\'ט מותאם אישית</string>
     <!-- Label: Shown when configuring a widget, next to checkbox, allows to show/hide the label of a widget -->
     <string name="label_show_widget_label">הצג תווית</string>
+    <!-- Label: Shown when configuring a widget, next to checkbox, allows to show/hide the icon of a widget -->
     <!-- Action label: Shown on button to confirm the creation of a widget, after configuring it -->
     <string name="action_create_widget">צור ווידג\'ט</string>
     <!-- Title: Configure Widget, shown when creating a widget and the user has some options to configure it -->
@@ -1274,6 +1290,7 @@
     <string name="action_type_parse_json">ניתוח JSON</string>
     <!-- Title of an action in the code snippet picker: Parse an XML string -->
     <string name="action_type_parse_xml">ניתוח XML</string>
+    <!-- Title of an action in the code snippet picker: Parse an HTML string -->
     <!-- Title of dialog, shown when opening the app and unsaved changes to a previously edited shortcut were found, asking the user whether they want to recover it -->
     <string name="title_unsaved_changes_detected">נמצא קיצור דרך שלא נשמר</string>
     <!-- Message on dialog, shown when opening the app and unsaved changes to a previously edited shortcut were found, asking the user whether they want to recover it. %s is a placeholder for the shortcut's name -->
@@ -1282,8 +1299,6 @@
     <string name="message_unsaved_changes_detected_no_name">נמצאו שינויים שלא נשמרו על קיצור דרך. האם תרצה לשחזר את השינויים ולהמשיך לערוך?</string>
     <!-- Button label, shown on dialog that asks user if they want to recover a shortcut that has unsaved changes -->
     <string name="button_recover">לְהַחלִים</string>
-    <!-- Message displayed in notification while a shortcut is being executed that was triggered from Tasker -->
-    <string name="running_tasker_plugin">Tasker מפעיל קיצור דרך</string>
     <!-- Button text: translate app (prompt to help & become a translator) -->
     <string name="settings_help_translate">הפוך למתרגם</string>
     <!-- Summary/subtitle of section in settings that prompts user to help translate the app -->
@@ -1292,7 +1307,7 @@
     <string name="button_sort_variables">סוג</string>
     <!-- Message: Shown in a snackbar after all variables have been sorted (alphabetically) -->
     <string name="message_variables_sorted">משתנים ממוינים.</string>
-    <!-- Button label on menu, for searching. Currently only used in Code Snippet picker but might be used to search in other places -->
+    <!-- Button label on menu, for searching. Used in Code Snippet picker and for Documentation screens -->
     <string name="menu_action_search">לחפש</string>
     <!-- Generic message for empty state when a search yields no results, displayed in the middle of the screen -->
     <string name="instructions_search_no_results">אין תוצאות</string>
@@ -1316,10 +1331,12 @@
     <string name="error_failed_to_send_udp">שליחת חבילת UDP נכשלה: %s</string>
     <!-- Error message: Shown when the user tries to send a TCP packet via Scripting but it fails. %s is a placeholder for a more detailed error message -->
     <string name="error_failed_to_send_tcp">שליחת חבילת TCP נכשלה: %s</string>
+    <!-- Error message: Shown when the user tries to read a TCP response via Scripting but it fails. %s is a placeholder for a more detailed error message -->
     <!-- Error message: Shown when the user tries to open a file via the openUrl function in Scripting, which is not supported -->
     <string name="error_opening_files_using_open_url_not_supported">פתיחת קבצים באמצעות openUrl() אינה נתמכת</string>
     <!-- Page title, for page showing all events that happened recently -->
     <!-- Button in Event History screen, to clear all events and empty the history -->
+    <!-- Button in Event History screen, to switch between showing absolute times and relative times -->
     <!-- Message: Shown in snackbar after all events were deleted from the Event History -->
     <!-- Empty state, shown in event history when there are no recent events -->
     <!-- Empty state instructions, shown in event history when there are no events -->
@@ -1406,6 +1423,9 @@
     <!-- Label on button, shown in Response settings of shortcut editor, allows the user to select which buttons they want to be displayed in the toolbar of the response window -->
     <!-- Title of the selection dialog which allows the user to select which buttons they want to be displayed in the toolbar of the response window -->
     <!-- Subtitle on button, shown in Response settings of shortcut editor, shows how many buttons the user has selected to be shown in the response window toolbar -->
+    <!-- Option in settings, allows to set whether hidden shortcuts should be visible or not -->
+    <!-- Option in "Hidden Shortcuts" selection in Setting screen, when selected all hidden shortcuts will be shown -->
+    <!-- Option in "Hidden Shortcuts" selection in Setting screen, when selected no hidden shortcuts will be shown -->
     <!-- Title of section in Settings screen, for section which contains experimental settings for new/unstable features -->
     <!-- Option in experimental settings, let's the user pick how shortcuts should be executed -->
     <!-- Option for "Execution Mode" experimental setting, shown in dropdown. Allows the use configure shortcuts to run in the foreground, i.e., showing a loading spinner -->
@@ -1425,4 +1445,54 @@
     <!-- Dialog title for dialog that lets the user choose the shape of their custom icon: square or circular -->
     <!-- Option in dialog that lets the user choose the shape of their custom icon -->
     <!-- Option in dialog that lets the user choose the shape of their custom icon -->
+    <!-- Warning message shown to user when an HTML page wants to open a URL in the external browser. %s is a placeholder for the URL. -->
+    <!-- Placeholder text shown in the text field for the search feature on the Documentation screen -->
+    <!-- Label for dropdown in shortcut editor, for picking the font size in which the response should be displayed -->
+    <!-- Option in font size drop down: Tiny -->
+    <!-- Option in font size drop down: Very small -->
+    <!-- Option in font size drop down: Small -->
+    <!-- Option in font size drop down: Regular -->
+    <!-- Option in font size drop down: Large -->
+    <!-- Option in font size drop down: Very large -->
+    <!-- Option in font size drop down: Huge -->
+    <!-- Dialog message, shown the first time the user uses the Wireguard integration, to help them set it up correctly -->
+    <!-- Error message, shown to user when they use the Wireguard integration but do not grant the permission for it -->
+    <!-- Button title, shown in Privacy section, for obtaining the device ID which should be included when making bug reports -->
+    <!-- Button subtitle, shown in Privacy section, for obtaining the device ID which should be included when making bug reports. %s is a placeholder for the ID, which is a random string of 20 characters -->
+    <!-- Snackbar message, shown when the user clicks the Device ID button in the Privacy section -->
+    <!-- Message displayed in at the top of the Export screen, to instruct the user what to do -->
+    <!-- Title shown on Response screen which allows to expand a panel showing some meta information about the response -->
+    <!-- Snackbar message, shown when the user switches the time mode on the Event History screen, to change the times to be displayed as absolute values (e.g. 13:37) -->
+    <!-- Snackbar message, shown when the user switches the time mode on the Event History screen, to change the times to be displayed as absolute relative (e.g. 42 sec ago) -->
+    <!-- Error message used as a fallback when the abortAndTreatAsFailure function is used but no custom error message was provided -->
+    <!-- Accessibility description for main menu button -->
+    <!-- Accessibility description for the variable button on the right of text input fields -->
+    <!-- Label on button shown on the Response Handling screen, clicking it leads to a settings screen that lets the user configure how the response (or custom message) is displayed -->
+    <!-- Subtitle on button shown on the Response Handling screen -->
+    <!-- Subtitle on button shown on the Response Handling screen -->
+    <!-- Subtitle on button shown on the Response Handling screen -->
+    <!-- Title of screen that lets the user configure how the HTTP response is displayed -->
+    <!-- Title of screen that lets the user configure how their custom message is displayed -->
+    <!-- Title of a generic warning dialog. The dialog may be used in various situations. -->
+    <!-- Message of warning dialog that shows when a request contains malformed JSON in its body -->
+    <!-- Label for checkbox in editor, to allow JSON responses to be displayed as a table instead of plain JSON -->
+    <!-- Screen title, for the Directories screen, which lets the user configure directories that can be used to read and write files -->
+    <!-- Option in main screen's menu, for the Directories screen, which lets the user configure directories that can be used to read and write files -->
+    <!-- Empty state, shown in list when there are no Directories yet -->
+    <!-- Empty state instructions, shown in list when there are no directories yet -->
+    <!-- Message, shown in snackbar, to confirm to the user that a directory was created/mounted -->
+    <!-- Message, shown in snackbar, confirming to user that a directory was deleted. %1$s is a placeholder for the directory's name -->
+    <!-- Action button label, shown in context menu of Directories screen, to allow re-mounting a directory, i.e., connecting it to a directory in the device's file system -->
+    <!-- Generic action button label, shown in context menus, allows renaming things, e.g. directories -->
+    <!-- Subtitle shown below directory name on Directories screen, when a directory is not mounted, i.e., it is disconnected from its counterpart on the device's file system -->
+    <!-- Subtitle shown below directory name on Directories screen, to indicate when this directory was last read from or written to -->
+    <!-- Subtitle shown below directory name on Directories screen, to indicate that this directory was never read from or written to -->
+    <!-- Instructions: Shown at the top of the Directories screen when picking a directory that should be used for a specific feature -->
+    <!-- Dialog prompt to ask user to confirm deletion of a directory -->
+    <!-- Title for the dialog window that lets the user rename a directory -->
+    <!-- Error message, informing user that the entered directory name already exists -->
+    <!-- Action, shown on dropdown when editing a shortcut, for allowing to hide a shortcut -->
+    <!-- Action, shown on dropdown when editing a shortcut, for allowing to show a hidden shortcut -->
+    <!-- Message, shown in snackbar, to confirm to the user that a shortcut was hidden -->
+    <!-- Message, shown in snackbar, to confirm to the user that a shortcut is no longer hidden and visible again -->
 </resources>

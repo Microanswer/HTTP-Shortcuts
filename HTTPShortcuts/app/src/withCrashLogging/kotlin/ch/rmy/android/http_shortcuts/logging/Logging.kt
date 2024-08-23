@@ -24,10 +24,10 @@ object Logging : ch.rmy.android.framework.extensions.Logging {
     private val MAX_APP_AGE = 3 * 30.days
 
     /**
-     * List of users who somehow manage to produce cryptic errors that I'm unable to debug or understand, and a lot of them too.
+     * List of devices who somehow manage to produce cryptic errors that I'm unable to debug or understand, and a lot of them too.
      * Suppressing them in a desperate attempt at avoiding going over error logging quota all the time.
      */
-    private val BLACKLISTED_USER_IDS = listOf(
+    private val BLACKLISTED_DEVICE_IDS = listOf(
         "853b9ed3-f3ed-4136-8af7-0ff02d333ae3",
         "c5080f5e-823b-4d47-868e-8711e2841961",
         "58087851-ef5b-4fa6-822b-9d4d4b5081af",
@@ -37,8 +37,8 @@ object Logging : ch.rmy.android.framework.extensions.Logging {
 
     fun initCrashReporting(context: Context) {
         val settings = Settings(context)
-        val userId = Settings(context).userId
-        if (isAppOutdated || !settings.isCrashReportingAllowed || userId in BLACKLISTED_USER_IDS) {
+        val deviceId = settings.deviceId
+        if (isAppOutdated || !settings.isCrashReportingAllowed || deviceId in BLACKLISTED_DEVICE_IDS) {
             return
         }
 
@@ -47,7 +47,7 @@ object Logging : ch.rmy.android.framework.extensions.Logging {
         }
 
         Bugsnag.start(context, createBugsnagConfig())
-        Bugsnag.setUser(userId, null, null)
+        Bugsnag.setUser(deviceId, null, null)
         Bugsnag.addOnError { event ->
             event.addMetadata("app", "installedFromStore", InstallUtil(context).isAppInstalledFromPlayStore())
             event.originalError?.let { !shouldIgnore(it) } ?: true
@@ -82,9 +82,8 @@ object Logging : ch.rmy.android.framework.extensions.Logging {
         }
     }
 
-    override fun logException(origin: String, e: Throwable) {
+    override fun logException(origin: String?, e: Throwable) {
         if (initialized && !shouldIgnore(e)) {
-            Bugsnag.leaveBreadcrumb("Logging exception from $origin")
             Bugsnag.notify(e)
         }
     }
@@ -96,9 +95,9 @@ object Logging : ch.rmy.android.framework.extensions.Logging {
             e is InflateException ||
             e.stackTrace.any { it.className.contains("Miui") }
 
-    override fun logInfo(origin: String, message: String) {
+    override fun logInfo(origin: String?, message: String) {
         if (initialized) {
-            Bugsnag.leaveBreadcrumb("$origin: $message")
+            Bugsnag.leaveBreadcrumb("${origin?.plus(": ") ?: ""}$message")
         }
     }
 }

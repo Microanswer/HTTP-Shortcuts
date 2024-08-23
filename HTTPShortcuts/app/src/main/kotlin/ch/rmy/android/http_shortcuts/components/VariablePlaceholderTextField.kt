@@ -22,8 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
@@ -161,6 +163,7 @@ fun VariablePlaceholderTextField(
     minLines: Int = 1,
     singleLine: Boolean = false,
     transformation: AnnotatedString.Builder.(String) -> Unit = {},
+    showVariableButton: Boolean = true,
 ) {
     val viewModel = hiltViewModel<VariablePlaceholderViewModel>()
     val placeholders by viewModel.variablePlaceholders.collectAsStateWithLifecycle()
@@ -195,6 +198,7 @@ fun VariablePlaceholderTextField(
         modifier = Modifier
             .fillMaxWidth()
             .focusRequester(focusRequester)
+            .clearAndSetSemantics { }
             .then(modifier),
         label = label,
         value = textFieldValue,
@@ -223,16 +227,21 @@ fun VariablePlaceholderTextField(
         minLines = minLines,
         singleLine = singleLine,
         placeholder = placeholder,
-        trailingIcon = {
-            IconButton(
-                onClick = {
-                    logInfo("VariablePlaceholderTextField", "Variable button clicked")
-                    dialogVisible = true
-                },
-            ) {
-                Icon(Icons.Filled.DataObject, null)
+        trailingIcon = if (showVariableButton) {
+            {
+                IconButton(
+                    onClick = {
+                        logInfo("VariablePlaceholderTextField", "Variable button clicked")
+                        dialogVisible = true
+                    },
+                ) {
+                    Icon(
+                        Icons.Filled.DataObject,
+                        contentDescription = stringResource(R.string.accessibility_variable_field_button),
+                    )
+                }
             }
-        },
+        } else null,
         visualTransformation = {
             transformVariablePlaceholders(it.text, placeholders, placeholderStyle, transformation)
         },
@@ -240,6 +249,7 @@ fun VariablePlaceholderTextField(
 
     if (dialogVisible) {
         val context = LocalContext.current
+        val keyboard = LocalSoftwareKeyboardController.current
         VariablePickerDialog(
             title = stringResource(R.string.dialog_title_variable_selection),
             variables = placeholders,
@@ -253,6 +263,7 @@ fun VariablePlaceholderTextField(
                 onValueChange(textFieldValue.text)
                 dialogVisible = false
                 focusRequester.requestFocus()
+                keyboard?.show()
             },
             showEditButton = allowOpeningVariableEditor,
             onDismissRequested = {

@@ -16,6 +16,7 @@ import com.google.gson.JsonSerializer
 import com.google.gson.reflect.TypeToken
 import com.google.gson.stream.MalformedJsonException
 import io.realm.kotlin.ext.realmListOf
+import io.realm.kotlin.types.RealmInstant
 import io.realm.kotlin.types.RealmList
 import java.io.EOFException
 import java.lang.reflect.ParameterizedType
@@ -23,15 +24,7 @@ import java.lang.reflect.Type
 
 object GsonUtil {
 
-    fun tryPrettyPrint(jsonString: String): String =
-        try {
-            prettyPrintOrThrow(jsonString)
-        } catch (e: JsonParseException) {
-            jsonString
-        }
-
-    fun prettyPrintOrThrow(jsonString: String): String {
-        val json = JsonParser.parseString(jsonString)
+    fun prettyPrintOrThrow(json: JsonElement): String {
         val gson = GsonBuilder()
             .setPrettyPrinting()
             .disableHtmlEscaping()
@@ -39,9 +32,14 @@ object GsonUtil {
         return gson.toJson(json)
     }
 
+    fun prettyPrintOrThrow(jsonString: String): String =
+        prettyPrintOrThrow(JsonParser.parseString(jsonString))
+
     fun extractErrorMessage(e: JsonParseException): String? =
         (e.cause as? MalformedJsonException)?.message
             ?.removePrefix("Use JsonReader.setLenient(true) to accept ")
+            ?.split("\nSee https")
+            ?.first()
             ?.replaceFirstChar { it.uppercaseChar() }
             ?: (e.cause as? EOFException)?.message
 
@@ -65,7 +63,7 @@ object GsonUtil {
             .create()
             .fromJson(data, Base::class.java)
 
-    fun <T> fromJsonObject(jsonObject: String?): Map<String, T> {
+    inline fun <reified T> fromJsonObject(jsonObject: String?): Map<String, T> {
         if (jsonObject == null) {
             return emptyMap()
         }
@@ -80,6 +78,7 @@ object GsonUtil {
     val gson: Gson by lazy {
         GsonBuilder()
             .registerTypeAdapter(Uri::class.java, UriSerializer)
+            .registerTypeAdapter(RealmInstant::class.java, RealmInstantSerializer)
             .create()
     }
 
@@ -89,5 +88,13 @@ object GsonUtil {
 
         override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Uri? =
             json?.asString?.toUri()
+    }
+
+    object RealmInstantSerializer : JsonSerializer<RealmInstant>, JsonDeserializer<RealmInstant> {
+        override fun serialize(src: RealmInstant, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement =
+            JsonPrimitive(src.epochSeconds)
+
+        override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): RealmInstant? =
+            json?.asLong?.let { RealmInstant.from(it, 0) }
     }
 }

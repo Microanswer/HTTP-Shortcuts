@@ -23,11 +23,17 @@ class CurlCommand internal constructor() : Serializable {
         private set
     var password = ""
         private set
+    var isDigestAuth: Boolean = false
+        private set
     var isFormData: Boolean = false
         private set
     var proxyHost: String = ""
         private set
     var proxyPort: Int = 0
+        private set
+    var insecure: Boolean = false
+        private set
+    var silent: Boolean = false
         private set
 
     class Builder {
@@ -82,6 +88,10 @@ class CurlCommand internal constructor() : Serializable {
             curlCommand.timeout = timeout
         }
 
+        fun isDigestAuth() = also {
+            curlCommand.isDigestAuth = true
+        }
+
         fun username(username: String) = also {
             curlCommand.username = username
         }
@@ -102,6 +112,14 @@ class CurlCommand internal constructor() : Serializable {
         fun forceGet() {
             method(METHOD_GET)
             forceGet = true
+        }
+
+        fun insecure() = also {
+            curlCommand.insecure = true
+        }
+
+        fun silent() = also {
+            curlCommand.silent = true
         }
 
         fun build(): CurlCommand {
@@ -143,6 +161,8 @@ class CurlCommand internal constructor() : Serializable {
         if (isFormData != other.isFormData) return false
         if (proxyHost != other.proxyHost) return false
         if (proxyPort != other.proxyPort) return false
+        if (insecure != other.insecure) return false
+        if (silent != other.silent) return false
         return true
     }
 
@@ -158,6 +178,8 @@ class CurlCommand internal constructor() : Serializable {
         result = 31 * result + isFormData.hashCode()
         result = 31 * result + proxyHost.hashCode()
         result = 31 * result + proxyPort
+        result = 31 * result + insecure.hashCode()
+        result = 31 * result + silent.hashCode()
         return result
     }
 }

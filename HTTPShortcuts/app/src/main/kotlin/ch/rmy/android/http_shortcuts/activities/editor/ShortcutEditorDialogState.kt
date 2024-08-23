@@ -6,11 +6,12 @@ import ch.rmy.android.http_shortcuts.icons.ShortcutIcon
 @Stable
 sealed class ShortcutEditorDialogState {
     @Stable
-    object DiscardWarning : ShortcutEditorDialogState()
+    data object DiscardWarning : ShortcutEditorDialogState()
 
     @Stable
     data class PickIcon(
         val currentIcon: ShortcutIcon.BuiltInIcon?,
+        val suggestionBase: String?,
         val includeFaviconOption: Boolean,
     ) : ShortcutEditorDialogState()
 }

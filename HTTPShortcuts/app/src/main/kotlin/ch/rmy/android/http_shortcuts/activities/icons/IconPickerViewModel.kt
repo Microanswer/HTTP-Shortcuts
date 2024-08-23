@@ -82,26 +82,19 @@ constructor(
     }
 
     fun onIconCreated(iconFile: File) = runAction {
-        val iconName = IconUtil.generateCustomIconName()
+        val iconName = IconUtil.generateCustomIconName(circular = selectedShape == IconShape.CIRCLE)
         val targetFile = File(context.filesDir, iconName)
         withContext(Dispatchers.IO) {
-            if (selectedShape == IconShape.CIRCLE) {
-                IconUtil.cropImageToCircle(iconFile, targetFile)
-            } else {
-                iconFile.renameTo(targetFile)
-            }
+            iconFile.renameTo(targetFile)
         }
         val icon = ShortcutIcon.CustomIcon(iconName)
 
-        val isFirstIcon = viewState.icons.isEmpty()
         updateViewState {
             copy(
                 icons = icons.plus(IconPickerListItem(icon, isUnused = true)),
             )
         }
-        if (isFirstIcon) {
-            selectIcon(icon)
-        }
+        selectIcon(icon)
     }
 
     fun onImagePickerFailed() = runAction {
@@ -125,7 +118,7 @@ constructor(
         when (val dialogState = viewState.dialogState) {
             is IconPickerDialogState.BulkDelete -> onBulkDeletionConfirmed()
             is IconPickerDialogState.DeleteIcon -> onDeletionConfirmed(dialogState.icon)
-            null -> Unit
+            else -> Unit
         }
     }
 

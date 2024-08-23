@@ -12,7 +12,9 @@ import androidx.annotation.WorkerThread
 import androidx.core.content.getSystemService
 import androidx.core.content.pm.ShortcutManagerCompat.EXTRA_SHORTCUT_ID
 import ch.rmy.android.framework.extensions.logException
+import ch.rmy.android.framework.extensions.logInfo
 import ch.rmy.android.framework.extensions.runIfNotNull
+import ch.rmy.android.http_shortcuts.R
 import ch.rmy.android.http_shortcuts.activities.ExecuteActivity
 import ch.rmy.android.http_shortcuts.activities.main.MainActivity
 import ch.rmy.android.http_shortcuts.data.domains.categories.CategoryId
@@ -35,6 +37,12 @@ constructor(
 
     fun supportsDirectShare() =
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
+
+    fun reportUse(shortcutId: ShortcutId) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            shortcutManager.reportShortcutUsed(createShortcutInfoId(shortcutId))
+        }
+    }
 
     @WorkerThread
     fun updateAppShortcuts(shortcuts: Collection<LauncherShortcut>) {
@@ -80,9 +88,9 @@ constructor(
         rank: Int = 0,
         trigger: ShortcutTriggerType,
     ): ShortcutInfo {
-        val icon = IconUtil.getIcon(context, launcherShortcut.icon)
+        val icon = IconUtil.getIcon(context, launcherShortcut.icon, adaptive = true)
         val label = launcherShortcut.name.ifEmpty { "-" }
-        return ShortcutInfo.Builder(context, ID_PREFIX_SHORTCUT + launcherShortcut.id)
+        return ShortcutInfo.Builder(context, createShortcutInfoId(launcherShortcut.id))
             .setShortLabel(label)
             .setLongLabel(label)
             .setRank(rank)
@@ -136,6 +144,7 @@ constructor(
 
     fun pinShortcut(shortcut: LauncherShortcut) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            logInfo("Pinning shortcut")
             val shortcutInfo = createShortcutInfo(shortcut, trigger = ShortcutTriggerType.HOME_SCREEN_SHORTCUT)
             shortcutManager.requestPinShortcut(shortcutInfo, null)
         }
@@ -151,6 +160,7 @@ constructor(
 
     fun updatePinnedShortcut(shortcut: LauncherShortcut) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            logInfo("Updating pinned shortcut")
             val shortcutInfo = createShortcutInfo(shortcut, trigger = ShortcutTriggerType.HOME_SCREEN_SHORTCUT)
             shortcutManager.updateShortcuts(listOf(shortcutInfo))
         }
@@ -185,18 +195,22 @@ constructor(
                     .categoryId(categoryId)
                     .build(context)
             )
-            .runIfNotNull(IconUtil.getIcon(context, icon)) {
+            .runIfNotNull(IconUtil.getIcon(context, icon, adaptive = true)) {
                 setIcon(it)
             }
             .build()
 
     fun removeShortcut(shortcutId: ShortcutId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            val ids = listOf(ID_PREFIX_SHORTCUT + shortcutId)
+            val ids = listOf(createShortcutInfoId(shortcutId))
             shortcutManager.removeLongLivedShortcuts(ids)
             shortcutManager.removeDynamicShortcuts(ids)
+            shortcutManager.disableShortcuts(ids, context.getString(R.string.error_shortcut_deleted))
         }
     }
+
+    private fun createShortcutInfoId(shortcutId: ShortcutId): String =
+        ID_PREFIX_SHORTCUT + shortcutId
 
     companion object {
         private const val ID_PREFIX_SHORTCUT = "shortcut_"

@@ -3,6 +3,7 @@ package ch.rmy.android.http_shortcuts.data.models
 import ch.rmy.android.framework.extensions.isInt
 import ch.rmy.android.framework.extensions.isUUID
 import ch.rmy.android.framework.extensions.takeUnlessEmpty
+import ch.rmy.android.http_shortcuts.data.domains.categories.CategoryId
 import ch.rmy.android.http_shortcuts.data.domains.shortcuts.ShortcutId
 import ch.rmy.android.http_shortcuts.data.dtos.TargetBrowser
 import ch.rmy.android.http_shortcuts.data.enums.ClientCertParams
@@ -25,6 +26,7 @@ class Shortcut() : RealmObject {
         id: ShortcutId = "",
         icon: ShortcutIcon = ShortcutIcon.NoIcon,
         executionType: ShortcutExecutionType = ShortcutExecutionType.APP,
+        categoryId: CategoryId? = null
     ) : this() {
         this.id = id
         this.icon = icon
@@ -32,15 +34,21 @@ class Shortcut() : RealmObject {
         if (executionType == ShortcutExecutionType.APP) {
             responseHandling = ResponseHandling()
         }
+        this.categoryId = categoryId
     }
 
     @PrimaryKey
     var id: ShortcutId = ""
     var executionType: String? = ShortcutExecutionType.APP.type
 
+    // Only valid when id == TEMPORARY_ID
+    var categoryId: CategoryId? = null
+
     var name: String = ""
 
     private var iconName: String? = icon.toString().takeUnlessEmpty()
+
+    var hidden: Boolean = false
 
     var method = METHOD_GET
 
@@ -73,7 +81,7 @@ class Shortcut() : RealmObject {
 
     private var authentication: String? = ShortcutAuthenticationType.NONE.type
 
-    var launcherShortcut: Boolean = false
+    var launcherShortcut: Boolean = true
 
     var secondaryLauncherShortcut: Boolean = false
 
@@ -165,6 +173,8 @@ class Shortcut() : RealmObject {
             proxy = value.type
         }
 
+    var excludeFromFileSharing: Boolean = false
+
     fun allowsBody(): Boolean =
         METHOD_POST == method ||
             METHOD_PUT == method ||
@@ -186,6 +196,7 @@ class Shortcut() : RealmObject {
             other.bodyContent != bodyContent ||
             other.description != description ||
             other.iconName != iconName ||
+            other.hidden != hidden ||
             other.method != method ||
             other.password != password ||
             other.authToken != authToken ||
@@ -219,7 +230,8 @@ class Shortcut() : RealmObject {
             other.wifiSsid != wifiSsid ||
             other.clientCert != clientCert ||
             other.browserPackageName != browserPackageName ||
-            other.excludeFromHistory != excludeFromHistory
+            other.excludeFromHistory != excludeFromHistory ||
+            other.excludeFromFileSharing != excludeFromFileSharing
         ) {
             return false
         }
@@ -279,16 +291,16 @@ class Shortcut() : RealmObject {
         require(method in setOf(METHOD_GET, METHOD_POST, METHOD_PUT, METHOD_PATCH, METHOD_DELETE, METHOD_HEAD, METHOD_OPTIONS, METHOD_TRACE)) {
             "Invalid method: $method"
         }
-        require(ShortcutExecutionType.values().any { it.type == executionType }) {
+        require(ShortcutExecutionType.entries.any { it.type == executionType }) {
             "Invalid shortcut executionType: $executionType"
         }
         require(retryPolicy in setOf(RETRY_POLICY_NONE, RETRY_POLICY_WAIT_FOR_INTERNET)) {
             "Invalid retry policy: $retryPolicy"
         }
-        require(RequestBodyType.values().any { it.type == requestBodyType }) {
+        require(RequestBodyType.entries.any { it.type == requestBodyType }) {
             "Invalid request body type: $requestBodyType"
         }
-        require(ShortcutAuthenticationType.values().any { it.type == authentication }) {
+        require(ShortcutAuthenticationType.entries.any { it.type == authentication }) {
             "Invalid authentication: $authentication"
         }
         require(timeout >= 0) {

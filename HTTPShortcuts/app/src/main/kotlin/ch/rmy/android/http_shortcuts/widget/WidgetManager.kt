@@ -5,7 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
+import android.util.TypedValue.COMPLEX_UNIT_SP
 import android.view.View
 import android.widget.RemoteViews
 import ch.rmy.android.framework.extensions.createIntent
@@ -24,8 +24,14 @@ constructor(
     private val widgetsRepository: WidgetsRepository,
 ) {
 
-    suspend fun createWidget(widgetId: Int, shortcutId: ShortcutId, showLabel: Boolean, labelColor: String?) {
-        widgetsRepository.createWidget(widgetId, shortcutId, showLabel, labelColor)
+    suspend fun createWidget(
+        widgetId: Int,
+        shortcutId: ShortcutId,
+        showLabel: Boolean,
+        showIcon: Boolean,
+        labelColor: String?,
+    ) {
+        widgetsRepository.createWidget(widgetId, shortcutId, showLabel, showIcon, labelColor)
     }
 
     suspend fun updateWidgets(context: Context, widgetIds: List<Int>) {
@@ -51,23 +57,25 @@ constructor(
                     .trigger(ShortcutTriggerType.WIDGET)
                     .build(context)
                     .let { intent ->
-                        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            PendingIntent.FLAG_IMMUTABLE
-                        } else 0
-                        PendingIntent.getActivity(context, widget.widgetId, intent, flags)
+                        PendingIntent.getActivity(context, widget.widgetId, intent, PendingIntent.FLAG_IMMUTABLE)
                     }
             )
             if (widget.showLabel) {
                 views.setViewVisibility(R.id.widget_label, View.VISIBLE)
                 views.setTextViewText(R.id.widget_label, shortcut.name)
                 views.setTextColor(R.id.widget_label, widget.labelColor?.let(Color::parseColor) ?: Color.WHITE)
+                views.setTextViewTextSize(R.id.widget_label, COMPLEX_UNIT_SP, if (shortcut.name.length < 20) 18f else 12f)
             } else {
                 views.setViewVisibility(R.id.widget_label, View.GONE)
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                views.setImageViewIcon(R.id.widget_icon, IconUtil.getIcon(context, shortcut.icon))
+            if (widget.showIcon) {
+                if (widget.showLabel) {
+                    views.setInt(R.id.widget_label, "setLines", 2)
+                }
+                views.setImageViewIcon(R.id.widget_icon, IconUtil.getIcon(context, shortcut.icon, adaptive = false))
             } else {
-                views.setImageViewUri(R.id.widget_icon, shortcut.icon.getIconURI(context, external = true))
+                views.setInt(R.id.widget_label, "setMaxLines", 4)
+                views.setViewVisibility(R.id.widget_icon, View.GONE)
             }
 
             AppWidgetManager.getInstance(context)

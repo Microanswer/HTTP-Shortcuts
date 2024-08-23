@@ -34,36 +34,37 @@ constructor(
     private val dialogHandler: ExecuteDialogHandler,
 ) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result = coroutineScope {
-        try {
-            logInfo("ExecuteWorker started")
+        logInfo("ExecuteWorker started")
 
-            launch {
-                dialogHandler.dialogState.collect { dialogState ->
-                    logInfo("ExecuteWorker processing dialog")
-                    if (dialogState != null) {
-                        try {
-                            val result = HostActivity.showDialog(context, dialogState)
-                            logInfo("ExecuteWorker dialog result received")
-                            dialogHandler.onDialogResult(result)
-                        } catch (e: CancellationException) {
-                            logInfo("ExecuteWorker dialog cancelled")
-                            dialogHandler.onDialogDismissed()
-                        }
+        val dialogJob = launch {
+            dialogHandler.dialogState.collect { dialogState ->
+                logInfo("ExecuteWorker processing dialog")
+                if (dialogState != null) {
+                    try {
+                        val result = HostActivity.showDialog(context, dialogState)
+                        logInfo("ExecuteWorker dialog result received")
+                        dialogHandler.onDialogResult(result)
+                    } catch (e: CancellationException) {
+                        logInfo("ExecuteWorker dialog cancelled")
+                        dialogHandler.onDialogDismissed()
                     }
                 }
             }
+        }
 
+        try {
             val execution = executionFactory.createExecution(getParams(), dialogHandler)
             execution.execute().collect()
 
             logInfo("ExecuteWorker finished")
-            Result.success()
         } catch (e: CancellationException) {
-            Result.success()
+            // Nothing to do here
         } catch (e: Throwable) {
             logException(e)
-            Result.failure()
+        } finally {
+            dialogJob.cancel()
         }
+        Result.success()
     }
 
     private fun getParams() =

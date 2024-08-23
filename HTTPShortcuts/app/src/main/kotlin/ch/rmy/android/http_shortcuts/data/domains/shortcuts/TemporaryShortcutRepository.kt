@@ -7,7 +7,9 @@ import ch.rmy.android.framework.data.RealmTransactionContext
 import ch.rmy.android.framework.extensions.getCaseInsensitive
 import ch.rmy.android.framework.extensions.swap
 import ch.rmy.android.framework.extensions.takeUnlessEmpty
+import ch.rmy.android.http_shortcuts.data.domains.categories.CategoryId
 import ch.rmy.android.http_shortcuts.data.domains.getTemporaryShortcut
+import ch.rmy.android.http_shortcuts.data.domains.working_directories.WorkingDirectoryId
 import ch.rmy.android.http_shortcuts.data.dtos.TargetBrowser
 import ch.rmy.android.http_shortcuts.data.enums.ClientCertParams
 import ch.rmy.android.http_shortcuts.data.enums.ConfirmationType
@@ -45,13 +47,14 @@ constructor(
             getTemporaryShortcut()
         }
 
-    suspend fun createNewTemporaryShortcut(initialIcon: ShortcutIcon, executionType: ShortcutExecutionType) {
+    suspend fun createNewTemporaryShortcut(initialIcon: ShortcutIcon, executionType: ShortcutExecutionType, categoryId: CategoryId) {
         commitTransaction {
             copyOrUpdate(
                 Shortcut(
                     id = Shortcut.TEMPORARY_ID,
                     icon = initialIcon,
                     executionType = executionType,
+                    categoryId = categoryId,
                 )
             )
         }
@@ -92,6 +95,12 @@ constructor(
                     shortcut.repetition?.interval = interval.inWholeMinutes.toInt()
                 }
             }
+        }
+    }
+
+    suspend fun setExcludeFromFileSharingChanged(exclude: Boolean) {
+        commitTransactionForShortcut { shortcut ->
+            shortcut.excludeFromFileSharing = exclude
         }
     }
 
@@ -282,9 +291,9 @@ constructor(
         }
     }
 
-    suspend fun setStoreDirectory(directoryUri: Uri?) {
+    suspend fun setStoreDirectory(workingDirectoryId: WorkingDirectoryId?) {
         commitTransactionForResponseHandling { responseHandling ->
-            responseHandling.storeDirectory = directoryUri?.toString()
+            responseHandling.storeDirectoryId = workingDirectoryId
         }
     }
 
@@ -297,6 +306,12 @@ constructor(
     suspend fun setUseMonospaceFont(enabled: Boolean) {
         commitTransactionForResponseHandling { responseHandling ->
             responseHandling.monospace = enabled
+        }
+    }
+
+    suspend fun setFontSize(fontSize: Int?) {
+        commitTransactionForResponseHandling { responseHandling ->
+            responseHandling.fontSize = fontSize
         }
     }
 
@@ -461,6 +476,12 @@ constructor(
         }
     }
 
+    suspend fun setJsonArrayAsTable(jsonArrayAsTable: Boolean) {
+        commitTransactionForResponseHandling { responseHandling ->
+            responseHandling.jsonArrayAsTable = jsonArrayAsTable
+        }
+    }
+
     suspend fun importFromCurl(curlCommand: CurlCommand) {
         commitTransactionForShortcut { shortcut ->
             shortcut.method = curlCommand.method
@@ -468,7 +489,11 @@ constructor(
             shortcut.username = curlCommand.username
             shortcut.password = curlCommand.password
             if (curlCommand.username.isNotEmpty() || curlCommand.password.isNotEmpty()) {
-                shortcut.authenticationType = ShortcutAuthenticationType.BASIC
+                shortcut.authenticationType = if (curlCommand.isDigestAuth) {
+                    ShortcutAuthenticationType.DIGEST
+                } else {
+                    ShortcutAuthenticationType.BASIC
+                }
             }
             shortcut.timeout = curlCommand.timeout
 
@@ -493,6 +518,21 @@ constructor(
                 if (!key.equals(HttpHeaders.CONTENT_TYPE, ignoreCase = true)) {
                     shortcut.headers.add(copy(Header(key = key, value = value)))
                 }
+            }
+
+            if (curlCommand.proxyHost.isNotEmpty() && curlCommand.proxyPort != 0) {
+                shortcut.proxyType = ProxyType.HTTP
+                shortcut.proxyHost = curlCommand.proxyHost
+                shortcut.proxyPort = curlCommand.proxyPort
+            }
+
+            if (curlCommand.insecure) {
+                shortcut.acceptAllCertificates = true
+            }
+
+            if (curlCommand.silent) {
+                shortcut.responseHandling?.successOutput = ResponseHandling.SUCCESS_OUTPUT_NONE
+                shortcut.responseHandling?.failureOutput = ResponseHandling.FAILURE_OUTPUT_NONE
             }
         }
     }

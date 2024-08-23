@@ -8,6 +8,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.app.ActivityCompat
 import ch.rmy.android.framework.extensions.context
 import ch.rmy.android.framework.extensions.logException
+import ch.rmy.android.framework.utils.ClipboardUtil
 import ch.rmy.android.framework.extensions.showToast
 import ch.rmy.android.framework.viewmodel.BaseViewModel
 import ch.rmy.android.http_shortcuts.R
@@ -44,6 +45,7 @@ constructor(
     private val restrictionsUtil: RestrictionsUtil,
     private val createQuickSettingsTile: CreateQuickSettingsTileUseCase,
     private val biometricUtil: BiometricUtil,
+    private val clipboardUtil: ClipboardUtil,
 ) : BaseViewModel<Unit, SettingsViewState>(application) {
     private val appContext: Context = application.applicationContext
 
@@ -54,7 +56,9 @@ constructor(
         selectedDarkModeOption = settings.darkThemeSetting,
         selectedClickActionOption = settings.clickBehavior,
         crashReportingAllowed = settings.isCrashReportingAllowed,
+        deviceId = settings.deviceId,
         colorTheme = settings.colorTheme,
+        showHiddenShortcuts = settings.showHiddenShortcuts,
         experimentalExecutionModeEnabled = settings.useExperimentalExecutionMode,
     )
 
@@ -159,6 +163,11 @@ constructor(
         }
     }
 
+    fun onDeviceIdButtonClicked() = runAction {
+        clipboardUtil.copyToClipboard(settings.deviceId)
+        showSnackbar(R.string.message_device_id_copied)
+    }
+
     fun onDialogDismissalRequested() = runAction {
         updateDialogState(null)
     }
@@ -184,6 +193,13 @@ constructor(
         settings.colorTheme = colorTheme
         updateViewState {
             copy(colorTheme = settings.colorTheme)
+        }
+    }
+
+    fun onShowHiddenShortcutsChanged(show: Boolean) = runAction {
+        settings.showHiddenShortcuts = show
+        updateViewState {
+            copy(showHiddenShortcuts = show)
         }
     }
 }

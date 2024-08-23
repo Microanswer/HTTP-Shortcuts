@@ -5,13 +5,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.Rect
+import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.getSystemService
 import androidx.core.graphics.drawable.DrawableCompat
@@ -20,7 +16,6 @@ import ch.rmy.android.http_shortcuts.icons.ShortcutIcon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileOutputStream
 import java.io.InputStream
 import java.time.Instant
 import java.util.regex.Pattern
@@ -33,6 +28,7 @@ object IconUtil {
 
     private const val CUSTOM_ICON_NAME_PREFIX = "custom-icon_"
     private const val CUSTOM_ICON_NAME_SUFFIX = ".png"
+    const val CUSTOM_CIRCULAR_ICON_NAME_SUFFIX = "_circle"
     private const val CUSTOM_ICON_NAME_ALTERNATIVE_SUFFIX = ".jpg"
 
     private const val CUSTOM_ICON_MAX_FILE_SIZE = 8 * 1024 * 1024
@@ -41,11 +37,10 @@ object IconUtil {
         "(${quote(CUSTOM_ICON_NAME_SUFFIX)}|${quote(CUSTOM_ICON_NAME_ALTERNATIVE_SUFFIX)})"
     private val CUSTOM_ICON_NAME_PATTERN = CUSTOM_ICON_NAME_REGEX.toPattern(Pattern.CASE_INSENSITIVE)
 
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    fun getIcon(context: Context, icon: ShortcutIcon): Icon? = try {
+    fun getIcon(context: Context, icon: ShortcutIcon, adaptive: Boolean): Icon? = try {
         when (icon) {
             is ShortcutIcon.NoIcon -> {
-                Icon.createWithResource(context.packageName, ShortcutIcon.NoIcon.ICON_RESOURCE)
+                Icon.createWithResource(context.packageName, ShortcutIcon.NoIcon.iconResource)
             }
             is ShortcutIcon.ExternalResourceIcon -> {
                 Icon.createWithResource(icon.packageName, icon.resourceId)
@@ -53,7 +48,7 @@ object IconUtil {
             is ShortcutIcon.CustomIcon -> {
                 val file = icon.getFile(context)
                 if (file == null) {
-                    Icon.createWithResource(context.packageName, ShortcutIcon.NoIcon.ICON_RESOURCE)
+                    Icon.createWithResource(context.packageName, ShortcutIcon.NoIcon.iconResource)
                 } else {
                     val options = BitmapFactory.Options()
                     options.inPreferredConfig = Bitmap.Config.ARGB_8888
@@ -62,9 +57,15 @@ object IconUtil {
                 }
             }
             is ShortcutIcon.BuiltInIcon -> {
-                val file = generateRasterizedIconForBuiltInIcon(context, icon)
-                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                Icon.createWithBitmap(bitmap)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && adaptive) {
+                    val file = generateRasterizedIconForBuiltInIcon(context, icon, adaptive = true)
+                    val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                    Icon.createWithAdaptiveBitmap(bitmap)
+                } else {
+                    val file = generateRasterizedIconForBuiltInIcon(context, icon)
+                    val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                    Icon.createWithBitmap(bitmap)
+                }
             }
         }
     } catch (e: Exception) {
@@ -74,8 +75,9 @@ object IconUtil {
     fun generateRasterizedIconForBuiltInIcon(
         context: Context,
         icon: ShortcutIcon.BuiltInIcon,
+        adaptive: Boolean = false,
     ): File {
-        val fileName = "icon_${icon.iconName}.png"
+        val fileName = "icon${if (adaptive) "_a" else ""}_${icon.iconName}.png"
         val file = context.getFileStreamPath(fileName)
         if (file.exists()) {
             return file
@@ -84,7 +86,11 @@ object IconUtil {
         val identifier = icon.getDrawableIdentifier(context)
         val options = BitmapFactory.Options()
         options.inPreferredConfig = Bitmap.Config.ARGB_8888
-        val bitmap = getBitmapFromVectorDrawable(context, identifier, icon.tint)
+        val bitmap = if (adaptive) {
+            getAdaptiveBitmapFromVectorDrawable(context, identifier, icon.tint, inferBackground = icon.hasBackground)
+        } else {
+            getBitmapFromVectorDrawable(context, identifier, icon.tint)
+        }
         context.openFileOutput(fileName, 0).use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
             it.flush()
@@ -106,12 +112,45 @@ object IconUtil {
         return bitmap
     }
 
+    private fun getAdaptiveBitmapFromVectorDrawable(context: Context, drawableId: Int, tint: Int?, inferBackground: Boolean): Bitmap {
+        val drawable = AppCompatResources.getDrawable(context, drawableId)!!
+        val density = context.resources.displayMetrics.density
+        val outerSize = (108 * density).toInt()
+        val innerSize = ((if (inferBackground) 64 else 54) * density).toInt()
+        val offset = (outerSize - innerSize) / 2
+        val bitmap = Bitmap.createBitmap(outerSize, outerSize, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(offset, offset, innerSize + offset, innerSize + offset)
+        if (tint != null) {
+            DrawableCompat.setTint(drawable, tint)
+        }
+        val backgroundColor = if (inferBackground) {
+            drawable.draw(canvas)
+            bitmap.getPixel(offset + 3, outerSize / 2)
+                .takeUnless { Color.alpha(it) != 0xFF }
+        } else {
+            null
+        }
+            ?: if (tint?.isCloseToWhite() == true) {
+                Color.BLACK
+            } else {
+                Color.WHITE
+            }
+
+        canvas.drawColor(backgroundColor)
+        drawable.draw(canvas)
+        return bitmap
+    }
+
+    private fun Int.isCloseToWhite() =
+        Color.red(this) > 200 && Color.green(this) > 200 && Color.blue(this) > 200
+
     fun createIconFromStream(context: Context, inStream: InputStream): ShortcutIcon? {
         val bitmap = BitmapFactory.decodeStream(inStream)
             ?: return null
         val iconSize = getIconSize(context)
         val scaledBitmap = bitmap.scale(iconSize, iconSize)
-        val iconName = generateCustomIconName()
+        val iconName = generateCustomIconName(circular = false)
         context.openFileOutput(iconName, 0).use {
             scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
             it.flush()
@@ -140,8 +179,11 @@ object IconUtil {
     fun isCustomIconName(string: String) =
         string.matches(CUSTOM_ICON_NAME_REGEX.toRegex())
 
-    fun generateCustomIconName(): String =
-        "${CUSTOM_ICON_NAME_PREFIX}x${Instant.now().toEpochMilli()}$CUSTOM_ICON_NAME_SUFFIX"
+    fun generateCustomIconName(circular: Boolean): String =
+        "${CUSTOM_ICON_NAME_PREFIX}x" +
+            "${Instant.now().toEpochMilli()}" +
+            (if (circular) CUSTOM_CIRCULAR_ICON_NAME_SUFFIX else "") +
+            CUSTOM_ICON_NAME_SUFFIX
 
     fun extractCustomIconNames(string: String): Set<String> =
         buildSet {
@@ -160,23 +202,4 @@ object IconUtil {
                 ?.map { it.name }
                 ?: emptyList()
         }
-
-    fun cropImageToCircle(input: File, output: File) {
-        val bitmap = BitmapFactory.decodeFile(input.absolutePath)
-        val target = Bitmap.createBitmap(bitmap.width, bitmap.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(target)
-        val paint = Paint()
-        val rect = Rect(0, 0, bitmap.width, bitmap.height)
-        paint.isAntiAlias = true
-        canvas.drawARGB(0, 0, 0, 0)
-        canvas.drawCircle((bitmap.width / 2).toFloat(), (bitmap.height / 2).toFloat(), (bitmap.width / 2).toFloat(), paint)
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        canvas.drawBitmap(bitmap, rect, rect, paint)
-        FileOutputStream(output).use {
-            target.compress(Bitmap.CompressFormat.PNG, 100, it)
-            it.flush()
-        }
-        bitmap.recycle()
-        target.recycle()
-    }
 }

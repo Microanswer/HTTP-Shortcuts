@@ -12,6 +12,7 @@ import ch.rmy.android.http_shortcuts.activities.variables.editor.types.BaseTypeV
 import ch.rmy.android.http_shortcuts.activities.variables.editor.types.ColorTypeViewModel
 import ch.rmy.android.http_shortcuts.activities.variables.editor.types.ConstantTypeViewModel
 import ch.rmy.android.http_shortcuts.activities.variables.editor.types.DateTypeViewModel
+import ch.rmy.android.http_shortcuts.activities.variables.editor.types.IncrementTypeViewModel
 import ch.rmy.android.http_shortcuts.activities.variables.editor.types.SelectTypeViewModel
 import ch.rmy.android.http_shortcuts.activities.variables.editor.types.SliderTypeViewModel
 import ch.rmy.android.http_shortcuts.activities.variables.editor.types.TextTypeViewModel
@@ -82,6 +83,7 @@ constructor(
             VariableType.SLIDER -> SliderTypeViewModel()
             VariableType.TIME -> TimeTypeViewModel()
             VariableType.TOGGLE -> ToggleTypeViewModel()
+            VariableType.INCREMENT -> IncrementTypeViewModel()
             VariableType.TIMESTAMP -> TimestampTypeViewModel()
             VariableType.UUID,
             VariableType.CLIPBOARD,
@@ -122,6 +124,7 @@ constructor(
                         jsonEncodeChecked = variable.jsonEncode,
                         allowShareChecked = variable.isShareText || variable.isShareTitle,
                         shareSupport = variable.getShareSupport(),
+                        excludeValueFromExports = variable.isExcludeValueFromExport,
                     )
                 }
             }
@@ -130,6 +133,7 @@ constructor(
             dialogTitleVisible = variableType.supportsDialogTitle,
             dialogMessageVisible = variableType.supportsDialogMessage,
             variableTypeViewState = typeViewModel?.createViewState(variable),
+            excludeValueCheckboxVisible = variableType.storesValue,
         )
     }
 
@@ -297,6 +301,15 @@ constructor(
             return ShareSupport.TITLE
         }
         return ShareSupport.TEXT
+    }
+
+    fun onExcludeValueFromExportsChanged(exclude: Boolean) = runAction {
+        updateViewState {
+            copy(excludeValueFromExports = exclude)
+        }
+        withProgressTracking {
+            temporaryVariableRepository.setExcludeValueFromExports(exclude)
+        }
     }
 
     fun onDismissDialog() = runAction {

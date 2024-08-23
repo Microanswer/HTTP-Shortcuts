@@ -16,6 +16,9 @@ object CurlConstructor {
         }
 
         if (curlCommand.username.isNotEmpty()) {
+            if (curlCommand.isDigestAuth) {
+                builder.option("--digest")
+            }
             builder.option("-u", curlCommand.username + if (curlCommand.password.isNotEmpty()) ":" + curlCommand.password else "")
         }
 
@@ -37,6 +40,14 @@ object CurlConstructor {
 
         if (curlCommand.usesBinaryData) {
             builder.option("--data-binary", "@file")
+        }
+
+        if (curlCommand.insecure) {
+            builder.option("--insecure")
+        }
+
+        if (curlCommand.silent) {
+            builder.option("--silent")
         }
 
         return builder.build()

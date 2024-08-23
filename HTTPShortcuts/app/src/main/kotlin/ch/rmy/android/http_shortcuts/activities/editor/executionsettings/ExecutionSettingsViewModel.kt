@@ -5,6 +5,7 @@ import ch.rmy.android.framework.viewmodel.BaseViewModel
 import ch.rmy.android.http_shortcuts.data.domains.shortcuts.TemporaryShortcutRepository
 import ch.rmy.android.http_shortcuts.data.enums.ConfirmationType
 import ch.rmy.android.http_shortcuts.data.enums.ShortcutExecutionType
+import ch.rmy.android.http_shortcuts.extensions.hasFileParameter
 import ch.rmy.android.http_shortcuts.extensions.type
 import ch.rmy.android.http_shortcuts.tiles.QuickSettingsTileManager
 import ch.rmy.android.http_shortcuts.utils.AppOverlayUtil
@@ -46,6 +47,8 @@ constructor(
             excludeFromHistory = shortcut.excludeFromHistory,
             repetitionInterval = shortcut.repetition?.interval,
             canUseBiometrics = biometricUtil.canUseBiometrics(),
+            excludeFromFileSharing = shortcut.excludeFromFileSharing,
+            usesFiles = shortcut.usesGenericFileBody() || shortcut.hasFileParameter(),
         )
     }
 
@@ -131,10 +134,18 @@ constructor(
         }
     }
 
+    fun onExcludeFromFileSharingChanged(exclude: Boolean) = runAction {
+        updateViewState {
+            copy(excludeFromFileSharing = exclude)
+        }
+        withProgressTracking {
+            temporaryShortcutRepository.setExcludeFromFileSharingChanged(exclude)
+        }
+    }
+
     fun onAppOverlayDialogConfirmed() = runAction {
         updateDialogState(null)
-        val intent = appOverlayUtil.getSettingsIntent() ?: skipAction()
-        sendIntent(intent)
+        sendIntent(appOverlayUtil.getSettingsIntent())
     }
 
     fun onDelayButtonClicked() = runAction {

@@ -27,23 +27,29 @@ import ch.rmy.android.http_shortcuts.activities.execute.usecases.OpenInBrowserUs
 import ch.rmy.android.http_shortcuts.activities.execute.usecases.RequestBiometricConfirmationUseCase
 import ch.rmy.android.http_shortcuts.activities.execute.usecases.RequestSimpleConfirmationUseCase
 import ch.rmy.android.http_shortcuts.activities.execute.usecases.ShowResultDialogUseCase
+import ch.rmy.android.http_shortcuts.activities.execute.usecases.ValidateRequestDataUseCase
 import ch.rmy.android.http_shortcuts.activities.response.DisplayResponseActivity
 import ch.rmy.android.http_shortcuts.activities.response.models.ResponseData
 import ch.rmy.android.http_shortcuts.data.domains.app.AppRepository
 import ch.rmy.android.http_shortcuts.data.domains.pending_executions.PendingExecutionsRepository
 import ch.rmy.android.http_shortcuts.data.domains.shortcuts.ShortcutRepository
 import ch.rmy.android.http_shortcuts.data.domains.variables.VariableRepository
+import ch.rmy.android.http_shortcuts.data.domains.working_directories.WorkingDirectoryRepository
 import ch.rmy.android.http_shortcuts.data.enums.ConfirmationType
 import ch.rmy.android.http_shortcuts.data.enums.FileUploadType
 import ch.rmy.android.http_shortcuts.data.enums.ParameterType
 import ch.rmy.android.http_shortcuts.data.enums.PendingExecutionType
 import ch.rmy.android.http_shortcuts.data.enums.ResponseContentType
 import ch.rmy.android.http_shortcuts.data.enums.ShortcutExecutionType
+import ch.rmy.android.http_shortcuts.data.models.Base
+import ch.rmy.android.http_shortcuts.data.models.Category
 import ch.rmy.android.http_shortcuts.data.models.CertificatePin
 import ch.rmy.android.http_shortcuts.data.models.FileUploadOptions
 import ch.rmy.android.http_shortcuts.data.models.ResponseHandling
 import ch.rmy.android.http_shortcuts.data.models.Shortcut
+import ch.rmy.android.http_shortcuts.data.models.WorkingDirectory
 import ch.rmy.android.http_shortcuts.exceptions.NoActivityAvailableException
+import ch.rmy.android.http_shortcuts.exceptions.TreatAsFailureException
 import ch.rmy.android.http_shortcuts.exceptions.UserException
 import ch.rmy.android.http_shortcuts.extensions.getSafeName
 import ch.rmy.android.http_shortcuts.extensions.isTemporaryShortcut
@@ -68,6 +74,7 @@ import ch.rmy.android.http_shortcuts.utils.CacheFilesCleanupWorker
 import ch.rmy.android.http_shortcuts.utils.ErrorFormatter
 import ch.rmy.android.http_shortcuts.utils.FileTypeUtil
 import ch.rmy.android.http_shortcuts.utils.HTMLUtil
+import ch.rmy.android.http_shortcuts.utils.LauncherShortcutManager
 import ch.rmy.android.http_shortcuts.utils.NetworkUtil
 import ch.rmy.android.http_shortcuts.variables.VariableManager
 import ch.rmy.android.http_shortcuts.variables.VariableResolver
@@ -79,7 +86,6 @@ import dagger.hilt.components.SingletonComponent
 import io.realm.kotlin.ext.copyFromRealm
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
@@ -105,10 +111,12 @@ class Execution(
     private val pendingExecutionsRepository: PendingExecutionsRepository = entryPoint.pendingExecutionsRepository()
     private val variableRepository: VariableRepository = entryPoint.variableRepository()
     private val appRepository: AppRepository = entryPoint.appRepository()
+    private val workingDirectoryRepository: WorkingDirectoryRepository = entryPoint.workingDirectoryRepository()
     private val variableResolver: VariableResolver = entryPoint.variableResolver()
     private val httpRequester: HttpRequester = entryPoint.httpRequester()
     private val showResultDialog: ShowResultDialogUseCase = entryPoint.showResultDialog()
     private val executionScheduler: ExecutionScheduler = entryPoint.executionScheduler()
+    private val launcherShortcutManager: LauncherShortcutManager = entryPoint.launcherShortcutManager()
     private val openInBrowser: OpenInBrowserUseCase = entryPoint.openInBrowser()
     private val requestSimpleConfirmation: RequestSimpleConfirmationUseCase = entryPoint.requestSimpleConfirmation()
     private val requestBiometricConfirmation: RequestBiometricConfirmationUseCase = entryPoint.requestBiometricConfirmation()
@@ -126,9 +134,12 @@ class Execution(
     private val executionSchedulerStarter: ExecutionSchedulerWorker.Starter = entryPoint.executionSchedulerStarter()
     private val sessionMonitor: SessionMonitor = entryPoint.sessionMonitor()
     private val navigationArgStore: NavigationArgStore = entryPoint.navigationArgStore()
+    private val validateRequestData: ValidateRequestDataUseCase = entryPoint.validateRequestData()
 
     private lateinit var globalCode: String
+    private lateinit var category: Category
     private lateinit var shortcut: Shortcut
+    private var workingDirectory: WorkingDirectory? = null
     private lateinit var certificatePins: List<CertificatePin>
 
     private val shortcutName by lazy {
@@ -230,6 +241,8 @@ class Execution(
             )
         }
 
+        launcherShortcutManager.reportUse(params.shortcutId)
+
         when (requiresConfirmation()) {
             ConfirmationType.SIMPLE -> requestSimpleConfirmation(shortcutName, dialogHandle)
             ConfirmationType.BIOMETRIC -> requestBiometricConfirmation(shortcutName)
@@ -262,8 +275,10 @@ class Execution(
         val resultHandler = ResultHandler()
 
         if (usesScripting) {
+            logInfo("Initializing ScriptExecutor")
             scriptExecutor.initialize(
                 shortcut = shortcut,
+                category = category,
                 variableManager = variableManager,
                 fileUploadResult = fileUploadResult,
                 resultHandler = resultHandler,
@@ -277,6 +292,7 @@ class Execution(
             scriptExecutor.execute(shortcut.codeOnPrepare)
         }
 
+        logInfo("Resolving variables")
         variableResolver.resolve(variableManager, shortcut, dialogHandle)
 
         when (shortcut.type) {
@@ -328,12 +344,16 @@ class Execution(
                 httpRequester
                     .executeShortcut(
                         context,
-                        shortcut,
+                        shortcut = shortcut,
+                        storeDirectoryUri = workingDirectory?.directoryUri,
                         sessionId = sessionId,
                         variableValues = variableManager.getVariableValuesByIds(),
                         fileUploadResult = fileUploadResult,
                         useCookieJar = shortcut.acceptCookies,
                         certificatePins = certificatePins,
+                        validateRequestData = { requestData ->
+                            validateRequestData(dialogHandle, shortcut, requestData)
+                        },
                     )
             } catch (e: UnknownHostException) {
                 if (shouldReschedule(e)) {
@@ -386,13 +406,48 @@ class Execution(
             throw e
         }
 
-        scriptExecutor.execute(
-            script = shortcut.codeOnSuccess,
-            response = response,
-        )
+        try {
+            scriptExecutor.registerAbortAndTreatAsFailure()
+            scriptExecutor.execute(
+                script = shortcut.codeOnSuccess,
+                response = response,
+            )
+        } catch (e: TreatAsFailureException) {
+            scriptExecutor.execute(
+                script = shortcut.codeOnFailure,
+                error = ErrorResponse(response),
+            )
 
-        if (shortcut.responseHandling?.storeDirectory != null && response.contentFile != null) {
-            renameResponseFile(response, variableManager)
+            when (val failureOutput = shortcut.responseHandling?.failureOutput) {
+                ResponseHandling.FAILURE_OUTPUT_DETAILED,
+                ResponseHandling.FAILURE_OUTPUT_SIMPLE,
+                -> {
+                    displayResult(
+                        generateOutputFromError(e, simple = failureOutput == ResponseHandling.FAILURE_OUTPUT_SIMPLE),
+                        response = response,
+                    )
+                }
+                else -> Unit
+            }
+
+            emit(
+                ExecutionStatus.CompletedWithError(
+                    error = null,
+                    response = response,
+                    variableValues = variableManager.getVariableValuesByIds(),
+                    result = resultHandler.getResult(),
+                ),
+            )
+            return
+        }
+
+        if (shortcut.responseHandling?.storeDirectoryId != null && response.contentFile != null) {
+            workingDirectoryRepository.touchWorkingDirectory(shortcut.responseHandling!!.storeDirectoryId!!)
+            withContext(Dispatchers.IO) {
+                workingDirectory?.directoryUri?.let {
+                    renameResponseFile(response, variableManager, it)
+                }
+            }
         }
 
         emit(
@@ -440,17 +495,46 @@ class Execution(
 
     private suspend fun loadData() {
         coroutineScope {
-            val baseDeferred = async {
-                appRepository.getBase()
-            }
-            val shortcutDeferred = async {
-                shortcutRepository.getShortcutById(params.shortcutId)
-            }
-            val base = baseDeferred.await()
+            val base = appRepository.getBase()
             globalCode = base.globalCode.orEmpty()
-            shortcut = shortcutDeferred.await()
+            if (!findCategoryAndShortcut(base)) {
+                throw NoSuchElementException()
+            }
+            workingDirectory = shortcut.responseHandling?.storeDirectoryId?.let { workingDirectoryId ->
+                base.workingDirectories.find { it.id == workingDirectoryId }
+            }
+            logInfo("Shortcut loaded: type=${shortcut.type}")
             certificatePins = base.certificatePins
         }
+    }
+
+    private suspend fun findCategoryAndShortcut(base: Base): Boolean {
+        if (params.shortcutId == Shortcut.TEMPORARY_ID) {
+            shortcut = shortcutRepository.getShortcutById(Shortcut.TEMPORARY_ID)
+            category = if (shortcut.categoryId == null) {
+                logException(IllegalStateException("categoryId was not set in temporary shortcut"))
+                null
+            } else {
+                base.categories.firstOrNull { it.id == shortcut.categoryId!! }
+                    .also {
+                        if (it == null) {
+                            logException(IllegalStateException("Temporary shortcut's category not found"))
+                        }
+                    }
+            }
+                ?: Category().apply { id = "unknown" }
+            return true
+        }
+        for (category in base.categories) {
+            for (shortcut in category.shortcuts) {
+                if (shortcut.id == params.shortcutId) {
+                    this@Execution.category = category
+                    this@Execution.shortcut = shortcut
+                    return true
+                }
+            }
+        }
+        return false
     }
 
     private suspend fun scheduleRepetitionIfNeeded() {
@@ -611,7 +695,9 @@ class Execution(
                         timing = response?.timing,
                         showDetails = shortcut.responseHandling?.includeMetaInfo == true,
                         monospace = shortcut.responseHandling?.monospace == true,
+                        fontSize = shortcut.responseHandling?.fontSize,
                         actions = shortcut.responseHandling?.displayActions ?: emptyList(),
+                        jsonArrayAsTable = shortcut.responseHandling?.jsonArrayAsTable == true,
                     )
                     val responseDataId = navigationArgStore.storeArg(responseData)
                     DisplayResponseActivity.IntentBuilder(shortcutName, responseDataId)
@@ -622,10 +708,9 @@ class Execution(
         }
     }
 
-    private fun renameResponseFile(response: ShortcutResponse, variableManager: VariableManager) {
+    private fun renameResponseFile(response: ShortcutResponse, variableManager: VariableManager, directoryUri: Uri) {
         try {
             val responseHandling = shortcut.responseHandling!!
-            val directoryUri = responseHandling.storeDirectory!!.toUri()
             val directory = DocumentFile.fromTreeUri(context, directoryUri)
             val fileName = responseHandling.storeFileName
                 ?.takeUnlessEmpty()
@@ -665,10 +750,12 @@ class Execution(
         fun pendingExecutionsRepository(): PendingExecutionsRepository
         fun variableRepository(): VariableRepository
         fun appRepository(): AppRepository
+        fun workingDirectoryRepository(): WorkingDirectoryRepository
         fun variableResolver(): VariableResolver
         fun httpRequester(): HttpRequester
         fun showResultDialog(): ShowResultDialogUseCase
         fun executionScheduler(): ExecutionScheduler
+        fun launcherShortcutManager(): LauncherShortcutManager
         fun openInBrowser(): OpenInBrowserUseCase
         fun requestSimpleConfirmation(): RequestSimpleConfirmationUseCase
         fun requestBiometricConfirmation(): RequestBiometricConfirmationUseCase
@@ -686,6 +773,7 @@ class Execution(
         fun executionSchedulerStarter(): ExecutionSchedulerWorker.Starter
         fun sessionMonitor(): SessionMonitor
         fun navigationArgStore(): NavigationArgStore
+        fun validateRequestData(): ValidateRequestDataUseCase
     }
 
     companion object {

@@ -66,10 +66,8 @@
     <string name="action_delete">削除</string>
     <!-- Shortcut dropdown option: export the shortcut -->
     <string name="action_export">エクスポート</string>
-    <!-- Dialog button: Confirm exporting the selected shortcuts -->
+    <!-- Menu button: Confirm exporting the selected shortcuts -->
     <string name="dialog_button_export">エクスポート</string>
-    <!-- Dialog title: shown in dialog when selecting which shortcuts to export -->
-    <string name="dialog_title_select_shortcuts_for_export">ショートカットを選択</string>
     <!-- Shortcut dropdown option: display information about the shortcut -->
     <string name="action_shortcut_information">情報を表示</string>
     <!-- Shortcut dropdown option: Move the shortcut (up, down, or to different category) -->
@@ -88,6 +86,8 @@
     <string name="empty_state_shortcuts_instructions">ショートカットは、任意のレスポンス処理や表示を含め、１行のHTTPリクエストを送信できます。
 
 開始するには[＋]ボタンをクリックするか、「アプリについて」項目のドキュメントを確認してください。</string>
+    <!-- Empty state, shown in list when there are no shortcuts yet, but the user already knows how to create shortcuts / categories -->
+    <string name="empty_state_no_shortcuts_in_category">このカテゴリーにショートカットなし</string>
     <!-- Empty state, shown in list of trigger shortcuts (multi-shortcut) when there are no shortcuts added yet -->
     <string name="empty_state_trigger_shortcuts">トリガーするショートカットが追加されていません。</string>
     <!-- Empty state instructions, shown in trigger shortcuts list (multi-shortcut) when there are no shortcuts added yet -->
@@ -110,6 +110,8 @@
     <string name="executed">%s 実行しました</string>
     <!-- Error message shown in Toast when shortcut on home screen was clicked but the corresponding data was not found (i.e. might have been deleted). -->
     <string name="shortcut_not_found">ショートカットが見つかりません。 ホーム画面に再び追加する必要があるかもしれません。</string>
+    <!-- Error message shown when a user clicks a shortcut that was pinned to the home screen, but the shortcut no longer exists because it was deleted. -->
+    <string name="error_shortcut_deleted">このショートカットは削除されました。</string>
     <!-- Validation error, shown when user tries to save a shortcut without a name -->
     <string name="validation_name_not_empty">名前を入力してください</string>
     <!-- Validation error, shown when user tries to save a shortcut without a valid URL -->
@@ -154,8 +156,6 @@
     <string name="dialog_ok">OK</string>
     <!-- Generic button: Cancel -->
     <string name="dialog_cancel">キャンセル</string>
-    <!-- Generic button: Help (to open documentation) -->
-    <string name="dialog_help">ヘルプ</string>
     <!-- Generic button: remove -->
     <string name="dialog_remove">削除</string>
     <!-- Section title in shortcut editor, for section that contains options to specify the headers of the HTTP request -->
@@ -222,8 +222,10 @@
     <string name="settings_import_from_file">ファイルからインポート</string>
     <!-- Button in settings page to start import of shortcuts from a url -->
     <string name="settings_import_from_url">URLからインポート</string>
-    <!-- Button in settings page to start export of shortcuts -->
-    <string name="settings_export">ショートカットと変数をエクスポート</string>
+    <!-- Button on Import&Export screen to lets the user export shortcuts into a file -->
+    <string name="settings_export_to_file">ファイルへエクスポート</string>
+    <!-- Button on Import&Export screen to lets the user export shortcuts via the share dialog -->
+    <string name="settings_export_via_share">共有ダイアログでエクスポート</string>
     <!-- Button in settings page to start editing shortcuts from a connected computer -->
     <string name="settings_remote_edit">パソコンで編集</string>
     <!-- Success message, shown in snackbar when export of shortcuts is successful -->
@@ -266,6 +268,8 @@
     <string name="label_subtitle_client_cert_in_use">証明「%s」を利用しています。クリックで削除します。</string>
     <!-- Subtitle for button to select a client certificate, when a file based certificate has been selected -->
     <string name="label_subtitle_client_cert_file_in_use">証明書ファイルを使用しています。クリックして削除します。</string>
+    <!-- Subtitle for button to select a client certificate, when it is disabled because the shortcut uses HTTP instead of HTTPS -->
+    <string name="label_subtitle_not_applicable_for_http">HTTPS を使用時のみ適用可能</string>
     <!-- Title for dialog, when selecting a client certificate -->
     <string name="title_client_cert">クライアント証明書</string>
     <!-- Label, for option in dialog to pick a client certificate managed by the operating system -->
@@ -445,7 +449,7 @@
     <!-- Type of variable: Slider, i.e. a horizontal bar that allows to pick a number by sliding a knob left or right -->
     <string name="variable_type_slider">スライドバーで入力</string>
     <!-- Description for type of variable: Slider, i.e. a horizontal bar that allows to pick a number by sliding a knob left or right -->
-    <string name="variable_type_slider_description">スライダ(最低値から最大値の設定)つきのダイアログを表示</string>
+    <string name="variable_type_slider_description">スライダ(最低値から最大値の設定バー)つきのダイアログを表示</string>
     <!-- Type of variable: Password Input, i.e., a dialog that asks user to enter a password -->
     <string name="variable_type_password">パスワードを入力</string>
     <!-- Description type of variable: Password Input, i.e., a dialog that asks user to enter a password -->
@@ -458,6 +462,10 @@
     <string name="variable_type_toggle">切り替えスイッチで入力</string>
     <!-- Description for type of variable: Toggle, i.e., a variable that toggles/switches/iterates between multiple values when invoked -->
     <string name="variable_type_toggle_description">使用中に毎回、異なる値へ切り替える</string>
+    <!-- Type of variable: Increment, i.e., a variable that increases a counter by 1 and return the new value when invoked -->
+    <string name="variable_type_increment">増加カウンター</string>
+    <!-- Description for type of variable: Increment, i.e., a variable that increases a counter by 1 and return the new value when invoked -->
+    <string name="variable_type_increment_description">使用するごとに数値が増加します</string>
     <!-- Type of variable: UUID, i.e., a variable which will generate a random UUID (Universally Unique Identifier) as its value when used -->
     <string name="variable_type_uuid">UUID</string>
     <!-- Description for type of variable: UUID, i.e., a variable which will generate a random UUID (Universally Unique Identifier) as its value when used -->
@@ -492,6 +500,10 @@
     <string name="label_url_encode">URLエンコード</string>
     <!-- Checkbox label, for option to enable JSON encoding of a variable -->
     <string name="label_json_encode">JSONエンコード</string>
+    <!-- Checkbox label, for option to enable/disable the exclusion of a variable's value in exports -->
+    <string name="label_exclude_variable_value_from_exports">保存されている値をエクスポート時に除外</string>
+    <!-- Instructions shown below the "IExclude stored value from exports" checkbox in the variable editor -->
+    <string name="message_exclude_variable_value_from_exports_instructions">この変数に保存されている値 (もしあれば) をエクスポートに含めたくない場合は、これを有効にしてください。</string>
     <!-- Section title, for section containing basic settings for a shortcut -->
     <string name="section_basic_variable_settings">基本設定</string>
     <!-- Error message, informing user that the entered variable name is empty -->
@@ -588,10 +600,14 @@
     <string name="button_export_to_general">ドキュメント（ファイル保存）</string>
     <!-- Dialog option on Export dialog, for exporting by sharing text to another app -->
     <string name="button_export_send_to">その他のアプリ（共有）</string>
-    <!-- Dialog title when creating a new shortcut, shows options below -->
-    <string name="title_create_new_shortcut_options_dialog">ショートカットのタイプを選択</string>
+    <!-- Instruction text, shown at the top of the screen when creating a new shortcut, shows options below -->
+    <string name="instructions_create_new_shortcut_options_dialog">作成したいショートカットの種類を選択</string>
     <!-- Option in dialog to create new shortcut: from scratch (i.e., start with a blank editor) -->
     <string name="button_create_new">標準 HTTPショートカット</string>
+    <!-- Button in shortcut creation screen, to select the type of shortcut: from scratch (i.e., start with a blank editor) -->
+    <string name="button_create_from_scratch">新規作成する</string>
+    <!-- Section title, shown on shortcut creation screen, above the section that lets the user pick advanced shortcut types -->
+    <string name="section_title_advanced_shortcut_types">高度なタイプ</string>
     <!-- Option in dialog to create new shortcut: from cURL command (i.e., parse a cURL command and prepopulate editor) -->
     <string name="button_curl_import">cURLコマンドからインポート</string>
     <!-- Option in dialog to create new shortcut: create a browser shortcut, i.e., a shortcut that will open the external browser -->
@@ -622,10 +638,18 @@
     <string name="authentication_bearer">ベアラー(Bearer)認証</string>
     <!-- Label for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu, i.e., when long-pressing the app icon on the home screen -->
     <string name="label_launcher_shortcut">ランチャーにこのアプリのショートカットを表示する</string>
-    <!-- Label for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu and it will be promoted as a Direct Share target, allowing easy sharing of content into that specific shortcut -->
-    <string name="label_launcher_shortcut_or_direct_share">ダイレクトシェア、Googleアシスタント、その他アプリのランチャーショートカットによるトリガーを許可する</string>
+    <!-- Subtitle for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu -->
+    <string name="subtitle_launcher_shortcut">これにより、Google Assistant や Bixby Routines などのサードパーティーのアプリ経由でショートカットを使用することも可能になります。</string>
+    <!-- Subtitle for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu -->
+    <string name="subtitle_launcher_shortcut_with_direct_share">これにより、ダイレクト共有や、Google Assistant や Bixby Routines などのサードパーティーのアプリ経由でショートカットの使用も可能になります。</string>
     <!-- Label for option in shortcut editor, selecting it will cause a secondary app to appear in the device's launcher. This app will trigger the shortcut -->
     <string name="label_secondary_launcher_shortcut">セカンダリ―ランチャーアプリ経由のトリガーを許可</string>
+    <!-- Subtitle for option in shortcut editor, selecting it will cause a secondary app to appear in the device's launcher. This app will trigger the shortcut -->
+    <string name="subtitle_secondary_launcher_shortcut">これは、通常のホーム画面ウィジェットが使用できない場合などに便利です。</string>
+    <!-- Label for option in shortcut editor, selecting it will enable the shortcut as a file sharing target, meaning it will be possible to share files from outside the app and use them as this shortcut's request body or as a parameter -->
+    <string name="label_shortcut_as_file_share_target">共有ダイアログからのファイル受信を許可する</string>
+    <!-- Subtitle for option in shortcut editor, selecting it will enable the shortcut as a file sharing target, meaning it will be possible to share files from outside the app and use them as this shortcut's request body or as a parameter -->
+    <string name="subtitle_shortcut_as_file_share_target">これを有効にすると、他のアプリからファイル共有で、このショートカットのリクエストボディまたはフォームパラメータで使用できます。</string>
     <!-- Label for option in shortcut editor, selecting it will cause the shortcut to appear as an option in the Quick Settings Tile of the app -->
     <string name="label_quick_tile_shortcut">「クイック設定タイル」経由でトリガーを許可する</string>
     <!-- error message displayed when something goes wrong (e.g. response too big) when trying to share/export a response/text -->
@@ -753,6 +777,8 @@
     <string name="action_type_change_icon_title">ショートカット アイコンを変更</string>
     <!-- Shortcut Action Title: Change Shortcut Description -->
     <string name="action_type_change_icon_description">ショートカットの説明を変更</string>
+    <!-- Shortcut Action Title: Change Shortcut Visibility -->
+    <string name="action_type_change_shortcut_hidden_title">ショートカットを表示／非表示</string>
     <!-- Shortcut Action Title: Enqueue a shortcut, i.e., execute it after the current one finishes -->
     <string name="action_type_trigger_shortcut_title">トリガー 待ちショートカット</string>
     <!-- Shortcut Action Title: Execute another shortcut immediately and return its result -->
@@ -781,6 +807,8 @@
     <string name="error_action_type_send_wol_invalid_mac_address">無効なMACアドレス：%s</string>
     <!-- Shortcut Action Title: Trigger a task in Tasker -->
     <string name="action_type_trigger_tasker_title">Taskerタスクをトリガー</string>
+    <!-- Shortcut Action Title: Enable or disable a tunnel in the Wireguard app -->
+    <string name="action_type_set_wireguard_tunnel_state_title">Wireguardトンネルを有効または無効</string>
     <!-- Shortcut Action Title: Get the device's current (physical) location -->
     <string name="action_type_get_location_title">現在の位置情報を取得</string>
     <!-- Shortcut Action Description: Get the device's current (physical) location -->
@@ -795,6 +823,8 @@
     <string name="action_type_send_mqtt_message">MQTTメッセージを送信</string>
     <!-- Shortcut Action Title: Abort the execution of the shortcut -->
     <string name="action_type_abort_execution">実行を中止</string>
+    <!-- Shortcut Action Title: Abort the execution of the shortcut and instead run the steps as if the request had failed -->
+    <string name="action_type_abort_and_treat_as_failure">中止して「失敗」として扱う</string>
     <!-- Shortcut Action Title: Wait for a number of milliseconds before continuing with the script execution -->
     <string name="action_type_wait">待機</string>
     <!-- Shortcut Action Title: Get the IP Address of the current Wi-Fi -->
@@ -928,7 +958,7 @@
     <string name="title_add_code_snippet">コードスニペットを追加</string>
     <!-- Dialog option: shown in code snippet picker, shows options to get information about the current shortcut itself -->
     <string name="dialog_code_snippet_shortcut_info">ショートカット情報</string>
-    <!-- Dialog option: shown in code snippet picker, shows options to get information about the selected files -->
+    <!-- Dialog option: shown in code snippet picker, shows options to get information about the selected files and to interact with the file system -->
     <string name="dialog_code_snippet_files">選択されたファイル</string>
     <!-- Dialog option: shown in code snippet picker, shows options to get information about the HTTP response -->
     <string name="dialog_code_snippet_handle_response">レスポンスの取り扱い</string>
@@ -948,6 +978,10 @@
     <string name="dialog_code_snippet_network">ネットワーク</string>
     <!-- Dialog option: shown in code snippet picker, option to get the ID of the current shortcut -->
     <string name="dialog_code_snippet_get_shortcut_id">ショートカットIDを取得</string>
+    <!-- Dialog option: shown in code snippet picker, option to read data from a file -->
+    <string name="dialog_code_snippet_read_from_file">ファイルから読み込む</string>
+    <!-- Dialog option: shown in code snippet picker, option to write data to a file -->
+    <string name="dialog_code_snippet_write_to_file">ファイルに書き出す</string>
     <!-- Dialog option: shown in code snippet picker, option to get the name of a selected file -->
     <string name="dialog_code_snippet_get_file_name">選択したファイル名を取得</string>
     <!-- Dialog option: shown in code snippet picker, option to get the type of a selected file -->
@@ -984,6 +1018,8 @@
     <string name="error_shortcut_not_found_for_triggering">ショートカット「%1$s」が存在しないためトリガーできませんでした。</string>
     <!-- Error message: Shown in toast when "Rename Shortcut" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
     <string name="error_shortcut_not_found_for_renaming">ショートカットが存在しないためショートカット名「%1$s」を変更できませんでした。</string>
+    <!-- Error message: Shown in toast when "Set Shortcut Hidden" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
+    <string name="error_shortcut_not_found_for_set_visible">ショートカット「%1$s」が存在しないため表示を変更できませんでした。</string>
     <!-- Error message: Shown in toast when "Change Icon" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
     <string name="error_shortcut_not_found_for_changing_icon">ショートカットが存在しないためショートカット「%1$s」のアイコンを変更できませんでした。</string>
     <!-- Error message: Shown in toast when "Change Description" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
@@ -1046,10 +1082,14 @@
     <string name="error_text_too_long_for_variable">%d 文字数を超過しています。変数プレースホルダーを挿入できません。</string>
     <!-- Instructions: Shown in toast to inform user that they should select or create a shortcut to be placed on the home screen -->
     <string name="instructions_select_shortcut_for_home_screen">ホーム画面に配置するには、ショートカットを選択するか、作成してください。</string>
+    <!-- Instructions: Shown in info text at the top of the screen to inform user that they should select or create a shortcut, which is then used as by the 3rd party app (e.g. Tasker) -->
+    <string name="instructions_select_shortcut_for_plugin">トリガーするショートカットを選択または作成</string>
     <!-- Label: Shown when user selects a widget to place on the home screen, shown for the customizable widget (as opposite to the generic shortcut) -->
     <string name="label_widget">カスタム ウィジェット</string>
     <!-- Label: Shown when configuring a widget, next to checkbox, allows to show/hide the label of a widget -->
     <string name="label_show_widget_label">ラベルを表示</string>
+    <!-- Label: Shown when configuring a widget, next to checkbox, allows to show/hide the icon of a widget -->
+    <string name="label_show_widget_icon">アイコンを表示</string>
     <!-- Action label: Shown on button to confirm the creation of a widget, after configuring it -->
     <string name="action_create_widget">ウィジェット作成</string>
     <!-- Title: Configure Widget, shown when creating a widget and the user has some options to configure it -->
@@ -1266,6 +1306,8 @@
     <string name="action_type_parse_json">JSON解析</string>
     <!-- Title of an action in the code snippet picker: Parse an XML string -->
     <string name="action_type_parse_xml">XML解析</string>
+    <!-- Title of an action in the code snippet picker: Parse an HTML string -->
+    <string name="action_type_parse_html">HTML解析</string>
     <!-- Title of dialog, shown when opening the app and unsaved changes to a previously edited shortcut were found, asking the user whether they want to recover it -->
     <string name="title_unsaved_changes_detected">未保存のショートカットあり</string>
     <!-- Message on dialog, shown when opening the app and unsaved changes to a previously edited shortcut were found, asking the user whether they want to recover it. %s is a placeholder for the shortcut's name -->
@@ -1274,8 +1316,6 @@
     <string name="message_unsaved_changes_detected_no_name">未保存のショートカット変更が見つかりました。その変更を復元して編集を続けますか？</string>
     <!-- Button label, shown on dialog that asks user if they want to recover a shortcut that has unsaved changes -->
     <string name="button_recover">復元</string>
-    <!-- Message displayed in notification while a shortcut is being executed that was triggered from Tasker -->
-    <string name="running_tasker_plugin">Tasker がショートカットをトリガー</string>
     <!-- Button text: translate app (prompt to help & become a translator) -->
     <string name="settings_help_translate">翻訳者になる</string>
     <!-- Summary/subtitle of section in settings that prompts user to help translate the app -->
@@ -1284,7 +1324,7 @@
     <string name="button_sort_variables">並び替え</string>
     <!-- Message: Shown in a snackbar after all variables have been sorted (alphabetically) -->
     <string name="message_variables_sorted">変数を並び替え</string>
-    <!-- Button label on menu, for searching. Currently only used in Code Snippet picker but might be used to search in other places -->
+    <!-- Button label on menu, for searching. Used in Code Snippet picker and for Documentation screens -->
     <string name="menu_action_search">検索</string>
     <!-- Generic message for empty state when a search yields no results, displayed in the middle of the screen -->
     <string name="instructions_search_no_results">結果なし</string>
@@ -1308,12 +1348,16 @@
     <string name="error_failed_to_send_udp">UDPパケットを送信失敗: %s</string>
     <!-- Error message: Shown when the user tries to send a TCP packet via Scripting but it fails. %s is a placeholder for a more detailed error message -->
     <string name="error_failed_to_send_tcp">TCPパケットを送信失敗: %s</string>
+    <!-- Error message: Shown when the user tries to read a TCP response via Scripting but it fails. %s is a placeholder for a more detailed error message -->
+    <string name="error_failed_to_receive_tcp">TCPソケットから読み込みに失敗: %s</string>
     <!-- Error message: Shown when the user tries to open a file via the openUrl function in Scripting, which is not supported -->
     <string name="error_opening_files_using_open_url_not_supported">openURL()を使用して「ファイルを開く」はサポートされていません</string>
     <!-- Page title, for page showing all events that happened recently -->
     <string name="title_event_history">イベント履歴</string>
     <!-- Button in Event History screen, to clear all events and empty the history -->
     <string name="button_clear_history">履歴消去</string>
+    <!-- Button in Event History screen, to switch between showing absolute times and relative times -->
+    <string name="button_history_toggle_time_mode">タイムモードを切り替え</string>
     <!-- Message: Shown in snackbar after all events were deleted from the Event History -->
     <string name="message_history_cleared">履歴を消去しました</string>
     <!-- Empty state, shown in event history when there are no recent events -->
@@ -1501,6 +1545,12 @@
     <plurals name="subtitle_response_toolbar_actions">
         <item quantity="other">選択：%d個のボタン</item>
     </plurals>
+    <!-- Option in settings, allows to set whether hidden shortcuts should be visible or not -->
+    <string name="settings_title_show_hidden_shortcuts">非表示のショートカット</string>
+    <!-- Option in "Hidden Shortcuts" selection in Setting screen, when selected all hidden shortcuts will be shown -->
+    <string name="settings_option_show_hidden_shortcuts">非表示のショートカットを表示</string>
+    <!-- Option in "Hidden Shortcuts" selection in Setting screen, when selected no hidden shortcuts will be shown -->
+    <string name="settings_option_hide_hidden_shortcuts">非表示のショートカットを表示しない</string>
     <!-- Title of section in Settings screen, for section which contains experimental settings for new/unstable features -->
     <string name="settings_title_experimental">実験中</string>
     <!-- Option in experimental settings, let's the user pick how shortcuts should be executed -->
@@ -1539,4 +1589,104 @@
     <string name="icon_shape_square">四角</string>
     <!-- Option in dialog that lets the user choose the shape of their custom icon -->
     <string name="icon_shape_round">丸形</string>
+    <!-- Warning message shown to user when an HTML page wants to open a URL in the external browser. %s is a placeholder for the URL. -->
+    <string name="warning_page_wants_to_open_url">このページは、ブラウザで次のURLリンクを開きます:\n\n%s</string>
+    <!-- Placeholder text shown in the text field for the search feature on the Documentation screen -->
+    <string name="placeholder_documentation_search_query">ページ内で検索…</string>
+    <!-- Label for dropdown in shortcut editor, for picking the font size in which the response should be displayed -->
+    <string name="label_font_size">文字サイズ</string>
+    <!-- Option in font size drop down: Tiny -->
+    <string name="font_size_tiny">極小</string>
+    <!-- Option in font size drop down: Very small -->
+    <string name="font_size_very_small">非常に小さい</string>
+    <!-- Option in font size drop down: Small -->
+    <string name="font_size_small">小さい</string>
+    <!-- Option in font size drop down: Regular -->
+    <string name="font_size_regular">標準</string>
+    <!-- Option in font size drop down: Large -->
+    <string name="font_size_large">大きい</string>
+    <!-- Option in font size drop down: Very large -->
+    <string name="font_size_very_large">非常に大きい</string>
+    <!-- Option in font size drop down: Huge -->
+    <string name="font_size_huge">巨大</string>
+    <!-- Dialog message, shown the first time the user uses the Wireguard integration, to help them set it up correctly -->
+    <string name="wireguard_setup_instructions">Wireguardアプリの設定で「リモートコントロールアプリを許可する」も有効にしてください。</string>
+    <!-- Error message, shown to user when they use the Wireguard integration but do not grant the permission for it -->
+    <string name="wireguard_permission_not_granted">Wireguardアクセス許可が付与されていませんでした。</string>
+    <!-- Button title, shown in Privacy section, for obtaining the device ID which should be included when making bug reports -->
+    <string name="settings_device_id">デバイスID</string>
+    <!-- Button subtitle, shown in Privacy section, for obtaining the device ID which should be included when making bug reports. %s is a placeholder for the ID, which is a random string of 20 characters -->
+    <string name="settings_device_id_summary">Githubでバグ報告をする時に、このIDを含めてください:\n%s</string>
+    <!-- Snackbar message, shown when the user clicks the Device ID button in the Privacy section -->
+    <string name="message_device_id_copied">デバイスIDをクリップボードにコピーしました</string>
+    <!-- Message displayed in at the top of the Export screen, to instruct the user what to do -->
+    <string name="instructions_export">エクスポートするショートカットを選択してください。必要な変数は、全て自動的にエクスポートされます。</string>
+    <!-- Title shown on Response screen which allows to expand a panel showing some meta information about the response -->
+    <string name="title_response_meta_information">メタ情報</string>
+    <!-- Snackbar message, shown when the user switches the time mode on the Event History screen, to change the times to be displayed as absolute values (e.g. 13:37) -->
+    <string name="message_history_switched_to_absolute_times">絶対時刻に切り替えました</string>
+    <!-- Snackbar message, shown when the user switches the time mode on the Event History screen, to change the times to be displayed as absolute relative (e.g. 42 sec ago) -->
+    <string name="message_history_switched_to_relative_times">相対時刻に切り替えました</string>
+    <!-- Error message used as a fallback when the abortAndTreatAsFailure function is used but no custom error message was provided -->
+    <string name="error_user_defined">実行が中止され、失敗として扱いました</string>
+    <!-- Accessibility description for main menu button -->
+    <string name="accessibility_main_menu">メイン メニュー</string>
+    <!-- Accessibility description for the variable button on the right of text input fields -->
+    <string name="accessibility_variable_field_button">変数を追加</string>
+    <!-- Label on button shown on the Response Handling screen, clicking it leads to a settings screen that lets the user configure how the response (or custom message) is displayed -->
+    <string name="button_display_settings">設定を表示</string>
+    <!-- Subtitle on button shown on the Response Handling screen -->
+    <string name="subtitle_display_settings_for_response">レスポンスの表示方法を設定する</string>
+    <!-- Subtitle on button shown on the Response Handling screen -->
+    <string name="subtitle_display_settings_for_message">メッセージの表示方法を設定する</string>
+    <!-- Subtitle on button shown on the Response Handling screen -->
+    <string name="subtitle_display_settings_for_error">エラーメッセージの表示方法を設定する</string>
+    <!-- Title of screen that lets the user configure how the HTTP response is displayed -->
+    <string name="title_response_display">レスポンスの表示</string>
+    <!-- Title of screen that lets the user configure how their custom message is displayed -->
+    <string name="title_message_display">メッセージの表示</string>
+    <!-- Title of a generic warning dialog. The dialog may be used in various situations. -->
+    <string name="warning_dialog_title">注意</string>
+    <!-- Message of warning dialog that shows when a request contains malformed JSON in its body -->
+    <string name="warning_message_malformed_json">リクエストボディに無効なJSONが含まれているため、リクエストに失敗する可能性があります。\n\n%s</string>
+    <!-- Label for checkbox in editor, to allow JSON responses to be displayed as a table instead of plain JSON -->
+    <string name="label_json_array_as_table">JSON 配列をテーブルとして表示</string>
+    <!-- Screen title, for the Directories screen, which lets the user configure directories that can be used to read and write files -->
+    <string name="title_working_directories">マウントされたディレクトリ</string>
+    <!-- Option in main screen's menu, for the Directories screen, which lets the user configure directories that can be used to read and write files -->
+    <string name="menu_action_working_directories">ディレクトリ</string>
+    <!-- Empty state, shown in list when there are no Directories yet -->
+    <string name="empty_state_working_directories">ディレクトリはまだマウントされていません</string>
+    <!-- Empty state instructions, shown in list when there are no directories yet -->
+    <string name="empty_state_working_directories_instructions">ここで、ご使用のデバイスのファイルシステムのディレクトリをマウントすることができます。マウントすると、このアプリがコンテンツにアクセスして、新しいファイルを作成することができます。\n\n[＋]ボタンをクリックするとディレクトリをマウントします。</string>
+    <!-- Message, shown in snackbar, to confirm to the user that a directory was created/mounted -->
+    <string name="message_working_directory_mounted">ディレクトリがマウントされました</string>
+    <!-- Message, shown in snackbar, confirming to user that a directory was deleted. %1$s is a placeholder for the directory's name -->
+    <string name="working_directory_deleted">「%1$s」を削除しました</string>
+    <!-- Action button label, shown in context menu of Directories screen, to allow re-mounting a directory, i.e., connecting it to a directory in the device's file system -->
+    <string name="button_mount_working_directory">マウント</string>
+    <!-- Generic action button label, shown in context menus, allows renaming things, e.g. directories -->
+    <string name="action_rename">名前を変更</string>
+    <!-- Subtitle shown below directory name on Directories screen, when a directory is not mounted, i.e., it is disconnected from its counterpart on the device's file system -->
+    <string name="working_directory_unmounted_subtitle">マウント解除</string>
+    <!-- Subtitle shown below directory name on Directories screen, to indicate when this directory was last read from or written to -->
+    <string name="working_directory_last_accessed">最終アクセス: %s</string>
+    <!-- Subtitle shown below directory name on Directories screen, to indicate that this directory was never read from or written to -->
+    <string name="working_directory_never_accessed">一度もアクセスなし</string>
+    <!-- Instructions: Shown at the top of the Directories screen when picking a directory that should be used for a specific feature -->
+    <string name="instructions_select_directory">新しいディレクトリを選択またはマウントしてください。アプリからファイルを読み書きできるようにアクセス許可を付加します</string>
+    <!-- Dialog prompt to ask user to confirm deletion of a directory -->
+    <string name="confirm_delete_working_directory_message">このディレクトリされているマウントを解除しますか？ ファイルシステム上にある実際のディレクトのファイルは削除されません。</string>
+    <!-- Title for the dialog window that lets the user rename a directory -->
+    <string name="title_rename_working_directory">ディレクトリ名を変更</string>
+    <!-- Error message, informing user that the entered directory name already exists -->
+    <string name="validation_directory_name_already_exists">同じ名前のディレクトリが既に存在しています。</string>
+    <!-- Action, shown on dropdown when editing a shortcut, for allowing to hide a shortcut -->
+    <string name="action_hide_shortcut">非表示</string>
+    <!-- Action, shown on dropdown when editing a shortcut, for allowing to show a hidden shortcut -->
+    <string name="action_show_shortcut">表示する</string>
+    <!-- Message, shown in snackbar, to confirm to the user that a shortcut was hidden -->
+    <string name="message_shortcut_hidden">ショートカットが非表示</string>
+    <!-- Message, shown in snackbar, to confirm to the user that a shortcut is no longer hidden and visible again -->
+    <string name="message_shortcut_visible">今後ショートカットは非表示になりません</string>
 </resources>

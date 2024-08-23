@@ -4,14 +4,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.statusBarsIgnoringVisibility
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -28,10 +30,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import ch.rmy.android.framework.extensions.consume
@@ -46,7 +46,7 @@ enum class BackButton {
     CROSS,
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun <T : Any> SimpleScaffold(
     viewState: T?,
@@ -65,6 +65,7 @@ fun <T : Any> SimpleScaffold(
     val showSnackbar = remember(snackbarHostState, scope) {
         { message: String, long: Boolean ->
             scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
                 snackbarHostState.showSnackbar(
                     message = message,
                     duration = if (long) SnackbarDuration.Long else SnackbarDuration.Short,
@@ -105,7 +106,7 @@ fun <T : Any> SimpleScaffold(
     Scaffold(
         modifier = Modifier
             .imePadding()
-            .statusBarsPadding(),
+            .windowInsetsPadding(WindowInsets.statusBarsIgnoringVisibility),
         topBar = {
             TopAppBar(
                 title = {
@@ -141,11 +142,7 @@ fun <T : Any> SimpleScaffold(
                     ) {
                         Icon(
                             when (backButton) {
-                                BackButton.ARROW -> if (LocalLayoutDirection.current == LayoutDirection.Rtl) {
-                                    Icons.Filled.ArrowForward
-                                } else {
-                                    Icons.Filled.ArrowBack
-                                }
+                                BackButton.ARROW -> Icons.AutoMirrored.Filled.ArrowBack
                                 BackButton.CROSS -> Icons.Filled.Close
                             },
                             contentDescription = null,

@@ -10,6 +10,8 @@ import ch.rmy.android.http_shortcuts.data.domains.getCategoryById
 import ch.rmy.android.http_shortcuts.data.domains.getShortcutById
 import ch.rmy.android.http_shortcuts.data.domains.getShortcutByNameOrId
 import ch.rmy.android.http_shortcuts.data.domains.getTemporaryShortcut
+import ch.rmy.android.http_shortcuts.data.enums.ShortcutExecutionType
+import ch.rmy.android.http_shortcuts.data.models.ResponseHandling
 import ch.rmy.android.http_shortcuts.data.models.Shortcut
 import ch.rmy.android.http_shortcuts.icons.ShortcutIcon
 import io.realm.kotlin.ext.copyFromRealm
@@ -113,11 +115,14 @@ constructor(
         }
     }
 
-    suspend fun createTemporaryShortcutFromShortcut(shortcutId: ShortcutId) {
+    suspend fun createTemporaryShortcutFromShortcut(shortcutId: ShortcutId, categoryId: CategoryId) {
         commitTransaction {
             val shortcut = getShortcutById(shortcutId)
                 .findFirst()!!
             copyShortcut(shortcut, Shortcut.TEMPORARY_ID)
+                .apply {
+                    this.categoryId = categoryId
+                }
         }
     }
 
@@ -146,6 +151,9 @@ constructor(
                 }
                 headers.forEach { header ->
                     header.id = newUUID()
+                }
+                if (executionType == ShortcutExecutionType.APP.type && responseHandling == null) {
+                    responseHandling = ResponseHandling()
                 }
             }
             .let(::copyOrUpdate)
@@ -184,6 +192,14 @@ constructor(
             getShortcutById(shortcutId)
                 .findFirst()
                 ?.description = description
+        }
+    }
+
+    suspend fun setHidden(shortcutId: ShortcutId, hidden: Boolean) {
+        commitTransaction {
+            getShortcutById(shortcutId)
+                .findFirst()
+                ?.hidden = hidden
         }
     }
 }

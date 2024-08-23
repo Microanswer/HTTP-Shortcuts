@@ -1,6 +1,7 @@
 package ch.rmy.android.http_shortcuts.activities.main.usecases
 
 import androidx.annotation.CheckResult
+import ch.rmy.android.framework.utils.WebViewChecker
 import ch.rmy.android.http_shortcuts.utils.Settings
 import ch.rmy.android.http_shortcuts.utils.VersionUtil
 import javax.inject.Inject
@@ -15,6 +16,9 @@ constructor(
     operator fun invoke(): Boolean {
         val lastSeenVersion = settings.changeLogLastVersion
         if (isPermanentlyHidden) {
+            return false
+        }
+        if (!WebViewChecker.isWebViewAvailable()) {
             return false
         }
         val version = versionUtil.getVersionName()

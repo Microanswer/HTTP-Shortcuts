@@ -1,3 +1,145 @@
+## Version 3.17.0
+
+### Improvements
+- It is now possible to hide shortcuts inside the app, either manually or with the `setShortcutHidden` Scripting function.
+
+### Miscellaneous
+- Removed unnecessary details from malformed GSON error message
+- The size of the APK file is back to a more reasonable value, after having blown up unexpectedly for version 3.16.0
+
+### Bugfixes
+- When using the `prompt()` function with a very long text, the text now properly scrolls instead of pushing the text input field off screen.
+
+## Version 3.16.0
+
+### Improvements
+- It is now possible to read and write files using the Scripting feature
+- You can now exclude shortcuts from being able to receive files from the Share dialog, similar to how it was already possible to exclude variables. This option can be found on the "Trigger & Execution Settings" screen.
+- Variables can now be configured such that their values are excluded from exports
+- In widgets, it is now possible to hide the icon, allowing the creation of text-only home screen widgets
+
+### Miscellaneous
+- Android 5 is no longer supported. Android 6 is the new minimum supported Android version.
+- The maximum length for static variables is increased to 40'000 characters.
+- I'm beginning to phase out the feature that allows having variable placeholders inside static variables. Let me know if you see a problem with that.
+
+### Bugfixes
+- The label in widgets is now aligned such that multiple widgets placed next to each other with varying label lengths still look nice
+- Links to documentation now open in the browser instead of crashing when no web view is available
+- Fixed a few crashes that would occur during app startup in some rare cases
+
+## Version 3.15.0
+
+### Improvements
+- If the response is a JSON array, there is now an option to display it as a table instead of raw JSON
+- The curl import and export now support the `--silent` parameter
+- There is now a dedicated screen for managing directories, for granting the app access to reading and writing files. So far this is only used for storing HTTP responses into files, but it will be expanded upon in upcoming releases.
+
+### Bugfixes
+- In the widget, the label is now less likely to be truncated or hidden when there isn't enough space
+- When shortcuts are moved within the app, the shortcuts shown on the main app launcher are now also rearranged accordingly
+- When a shortcut that used the "Secondary Launcher App" option is deleted, the "Trigger Shortcut" app is properly removed from the launcher now
+
+## Version 3.14.0
+
+### Improvements
+- The Response Handling screen was redesigned for more clarity and to allow for future improvements
+- Shortcut selection dialogs now also show the shortcuts' descriptions
+- A warning is now displayed when a request body contains malformed JSON
+
+### Bugfixes
+- Fixed a crash that would happen on some devices when deleting characters in Scripting fields or the cURL import
+- Homescreen shortcuts are now properly disabled when the respective shortcut is deleted
+
+## Version 3.13.0
+
+### Improvements
+- On the Event History screen, it is now possible to use relative timestamps instead of absolute ones
+- The "Meta Information" section that is displayed above the response is now collapsed by default and can be expanded when needed
+- The icon picker for built-in icons now has a (rudimentary, English-only) search
+- There is now an `abortAndTreatAsFailure()` Scripting function which can be used to customize whether a response should be considered a success or not
+- The `sendTCPPacket()` Scripting function can now also be used to listen for incoming data, allowing for a basic request-response setup
+- Similar to the response window, it is now possible to also change the font size of the response dialog
+- The curl import now supports the `--head` parameter
+- Various small tweaks to the UI here and there to improve clarity, performance, and to make it more consistent
+
+### Miscellaneous
+- The Event History now shows up to 12 hours of data instead of only 8
+
+### Bugfixes
+- Fixed a crash that occasionally happened when testing shortcuts
+
+## Version 3.12.1
+
+### Bugfixes
+- Fixed crash when placing a shortcut on the home screen
+
+## Version 3.12.0
+
+### Improvements
+- The performance of the syntax highlighting is now improved, so that it also works on larger pieces of code or data
+- When exporting shortcuts, you can now more easily select which shortcuts should be exported
+- When importing from or exporting to curl, the `--insecure` option is now supported
+- In Scripting, it is now possible to get the ID and name of the category the current shortcut belongs to
+- Some tweaks to the built-in documentation were made to make it easier to understand
+
+### Miscellaneous
+- Newly created shortcuts now have the "Show as app shortcut on launcher" option enabled by default, for easier integration with other apps
+
+### Bugfixes
+- The `getClipboarContent()` function should now also work when using the experimental background execution setting
+- The `parseHtml()` function now also works for reading the content of `<script>` and `<style>` tags
+- When saving changes to Global Scripting, the screen now properly closes without showing the discard warning
+
+## Version 3.11.1
+
+### Bugfixes
+- Fixed a bug that caused some shortcuts to fail when executed. Mostly shortcuts that send requests to subdomains and use cookies were affected.
+
+## Version 3.11.0
+
+### Improvements
+- It is now possible to increase or decrease the font size when displaying a response in a window
+- The Scripting function `parseHTML()` was added, which allows to extract information from an HTML string
+- If you have Wireguard installed, you can now use the Scripting function `setWireguardTunnelState()` to enable or disable a tunnel
+- When opening a custom tab with the `openUrl()` function, it now shows the Share button
+- When the HTTP response is an image and it is displayed using the Fullscreen Window option, it is now possible to zoom in on the image
+
+### Miscellaneous
+- There is now an experimental setting, which lets you change the execution mode of all shortcuts from running in the foreground (i.e. by showing the spinner animation during execution) to running in the background (i.e., no spinner). If you try it out and discover problems, or if you try it out for a longer time and find no problems, please let me know.
+
+### Bugfixes
+- Hitting the back button while viewing the in-app documentation will now first close the search instead of navigating back to the previous page
+- When a text input field is automatically selected, the soft keyboard should now show up more reliably
+
+## Version 3.10.0
+
+### Improvements
+- There is now a new variable type "Incrementing Counter", which increases its value by 1 every time it is used
+- The `openUrl` Scripting function can now be used to target a specific browser, or to open a URL in custom tabs
+- When using the quick settings tile with only a single shortcut, and that shortcut uses a built-in icon with a distinct silhouette, the quick settings tile will use the shortcut's icon instead of displaying the default icon
+
+### Miscellaneous
+- When selecting a custom image and using the "circle" shape, an uncropped version of the image is preserved for better icon quality when placed on the home screen
+
+### Bugfixes
+- In the cURL import & export, digest authentication now properly uses `--digest`
+
+## Version 3.9.0
+
+### Improvements
+- When using multiple variables in a shortcut, their values are now resolved in deterministic order, according to the order in which the variables appear on the Variables screen
+- Built-in icons are now treated as adaptive icons, allowing them to have nicer backgrounds when placed on the home screen of devices that support this
+- It is now possible to search for text in the built-in documentation pages
+
+### Miscellaneous
+- When an HTML response tries to open a URL, either because of a redirect or a clicked link, it will first warn about the use of an external browser
+
+### Bugfixes
+- `<sub>` tags in HTML responses are no longer incorrectly displayed as superscript
+- Variable value resolution no longer fails under some rare conditions
+- Fixed a crash that would happen when trying to display a 1000+ lines plain text response
+
 ## Version 3.8.0
 
 ### Improvements

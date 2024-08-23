@@ -2,6 +2,16 @@
 -keep class ch.rmy.android.http_shortcuts.data.models.** { *; }
 -keep class ch.rmy.android.http_shortcuts.activities.contact.MetaData { *; }
 -keep class ch.rmy.android.http_shortcuts.activities.execute.models.ExecutionParams { *; }
+-keep class ch.rmy.android.http_shortcuts.http.FileUploadManager$Result { *; }
+-keep class ch.rmy.android.http_shortcuts.http.FileUploadManager$File { *; }
+-keep class ch.rmy.android.http_shortcuts.http.HttpRequesterWorker$Params { *; }
+-keep class ch.rmy.android.http_shortcuts.history.HistoryEvent$ShortcutTriggered { *; }
+-keep class ch.rmy.android.http_shortcuts.history.HistoryEvent$ShortcutCancelled { *; }
+-keep class ch.rmy.android.http_shortcuts.history.HistoryEvent$HttpRequestSent { *; }
+-keep class ch.rmy.android.http_shortcuts.history.HistoryEvent$HttpResponseReceived { *; }
+-keep class ch.rmy.android.http_shortcuts.history.HistoryEvent$NetworkError { *; }
+-keep class ch.rmy.android.http_shortcuts.history.HistoryEvent$Error { *; }
+-keep class ch.rmy.android.http_shortcuts.history.HistoryEvent$CustomEvent { *; }
 -dontwarn com.yalantis.ucrop**
 -keep class com.yalantis.ucrop** { *; }
 -keep interface com.yalantis.ucrop** { *; }

@@ -103,10 +103,11 @@ constructor(
                 temporaryShortcutRepository.createNewTemporaryShortcut(
                     initialIcon = Icons.getRandomInitialIcon(context),
                     executionType = executionType,
+                    categoryId = data.categoryId,
                 )
             }
             else -> {
-                shortcutRepository.createTemporaryShortcutFromShortcut(data.shortcutId)
+                shortcutRepository.createTemporaryShortcutFromShortcut(data.shortcutId, data.categoryId)
             }
         }
         data.curlCommandId
@@ -366,7 +367,7 @@ constructor(
 
         try {
             withProgressTracking {
-                shortcutRepository.copyTemporaryShortcutToShortcut(shortcutId, categoryId?.takeIf { isNewShortcut })
+                shortcutRepository.copyTemporaryShortcutToShortcut(shortcutId, categoryId.takeIf { isNewShortcut })
                 temporaryShortcutRepository.deleteTemporaryShortcut()
             }
             onSaveSuccessful(shortcutId)
@@ -446,6 +447,7 @@ constructor(
     }
 
     fun onScriptingButtonClicked() = runAction {
+        skipIfBusy()
         logInfo("Scripting button clicked")
         navigate(NavigationDestination.ShortcutEditorScripting.buildRequest(shortcutId))
     }
@@ -474,6 +476,7 @@ constructor(
         updateDialogState(
             ShortcutEditorDialogState.PickIcon(
                 currentIcon = viewState.shortcutIcon as? ShortcutIcon.BuiltInIcon,
+                suggestionBase = viewState.shortcutName,
                 includeFaviconOption = hasUrl(),
             ),
         )
@@ -540,7 +543,7 @@ constructor(
     }
 
     data class InitData(
-        val categoryId: CategoryId?,
+        val categoryId: CategoryId,
         val shortcutId: ShortcutId?,
         val curlCommandId: NavigationArgStore.ArgStoreId?,
         val executionType: ShortcutExecutionType,

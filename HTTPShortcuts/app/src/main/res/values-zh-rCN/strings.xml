@@ -66,10 +66,8 @@
     <string name="action_delete">删除</string>
     <!-- Shortcut dropdown option: export the shortcut -->
     <string name="action_export">导出</string>
-    <!-- Dialog button: Confirm exporting the selected shortcuts -->
+    <!-- Menu button: Confirm exporting the selected shortcuts -->
     <string name="dialog_button_export">导出</string>
-    <!-- Dialog title: shown in dialog when selecting which shortcuts to export -->
-    <string name="dialog_title_select_shortcuts_for_export">选择快捷方式</string>
     <!-- Shortcut dropdown option: display information about the shortcut -->
     <string name="action_shortcut_information">显示信息</string>
     <!-- Shortcut dropdown option: Move the shortcut (up, down, or to different category) -->
@@ -86,6 +84,8 @@
     <string name="empty_state_shortcuts">无快捷方式</string>
     <!-- Empty state instructions, shown in list when there are no shortcuts yet -->
     <string name="empty_state_shortcuts_instructions">按 + 以开始</string>
+    <!-- Empty state, shown in list when there are no shortcuts yet, but the user already knows how to create shortcuts / categories -->
+    <string name="empty_state_no_shortcuts_in_category">此类别中尚无快捷方式</string>
     <!-- Empty state, shown in list of trigger shortcuts (multi-shortcut) when there are no shortcuts added yet -->
     <string name="empty_state_trigger_shortcuts">你尚未添加任何要触发的快捷方式。</string>
     <!-- Empty state instructions, shown in trigger shortcuts list (multi-shortcut) when there are no shortcuts added yet -->
@@ -108,6 +108,8 @@
     <string name="executed">%s 已执行</string>
     <!-- Error message shown in Toast when shortcut on home screen was clicked but the corresponding data was not found (i.e. might have been deleted). -->
     <string name="shortcut_not_found">快捷方式不存在，您可能需要将其重新添加至桌面</string>
+    <!-- Error message shown when a user clicks a shortcut that was pinned to the home screen, but the shortcut no longer exists because it was deleted. -->
+    <string name="error_shortcut_deleted">此快捷方式已被删除。</string>
     <!-- Validation error, shown when user tries to save a shortcut without a name -->
     <string name="validation_name_not_empty">请输入一个名称</string>
     <!-- Validation error, shown when user tries to save a shortcut without a valid URL -->
@@ -152,8 +154,6 @@
     <string name="dialog_ok">确定</string>
     <!-- Generic button: Cancel -->
     <string name="dialog_cancel">取消</string>
-    <!-- Generic button: Help (to open documentation) -->
-    <string name="dialog_help">帮助</string>
     <!-- Generic button: remove -->
     <string name="dialog_remove">移除</string>
     <!-- Section title in shortcut editor, for section that contains options to specify the headers of the HTTP request -->
@@ -222,8 +222,10 @@
     <string name="settings_import_from_file">从文件导入</string>
     <!-- Button in settings page to start import of shortcuts from a url -->
     <string name="settings_import_from_url">从 URL 导入</string>
-    <!-- Button in settings page to start export of shortcuts -->
-    <string name="settings_export">导出快捷方式</string>
+    <!-- Button on Import&Export screen to lets the user export shortcuts into a file -->
+    <string name="settings_export_to_file">导出至文件</string>
+    <!-- Button on Import&Export screen to lets the user export shortcuts via the share dialog -->
+    <string name="settings_export_via_share">通过共享对话框导出</string>
     <!-- Button in settings page to start editing shortcuts from a connected computer -->
     <string name="settings_remote_edit">在电脑上编辑</string>
     <!-- Success message, shown in snackbar when export of shortcuts is successful -->
@@ -248,7 +250,7 @@
     <!-- Message shown in progress dialog while shortcuts are being imported -->
     <string name="import_in_progress">正在导出快捷方式…</string>
     <!-- Label, for option to pick the timeout of a shortcut. clicking it opens a picker dialog -->
-    <string name="label_timeout">创建超时</string>
+    <string name="label_timeout">超时时间</string>
     <!-- Label, for dropdown picker, allowing to select the proxy type of a shortcut -->
     <string name="label_proxy_type">代理类型</string>
     <!-- Label, for option to set the proxy hostname for a shortcut -->
@@ -267,6 +269,8 @@
     <string name="label_subtitle_client_cert_in_use">使用证书 \"%s\"。点击删除。</string>
     <!-- Subtitle for button to select a client certificate, when a file based certificate has been selected -->
     <string name="label_subtitle_client_cert_file_in_use">正使用证书文件。点击移除。</string>
+    <!-- Subtitle for button to select a client certificate, when it is disabled because the shortcut uses HTTP instead of HTTPS -->
+    <string name="label_subtitle_not_applicable_for_http">仅在使用 HTTPS 时可用</string>
     <!-- Title for dialog, when selecting a client certificate -->
     <string name="title_client_cert">客户端证书</string>
     <!-- Label, for option in dialog to pick a client certificate managed by the operating system -->
@@ -465,6 +469,10 @@
     <string name="variable_type_toggle">切换</string>
     <!-- Description for type of variable: Toggle, i.e., a variable that toggles/switches/iterates between multiple values when invoked -->
     <string name="variable_type_toggle_description">使用时每次切换到不同值</string>
+    <!-- Type of variable: Increment, i.e., a variable that increases a counter by 1 and return the new value when invoked -->
+    <string name="variable_type_increment">增加计数器</string>
+    <!-- Description for type of variable: Increment, i.e., a variable that increases a counter by 1 and return the new value when invoked -->
+    <string name="variable_type_increment_description">每次使用都会增大数字</string>
     <!-- Type of variable: UUID, i.e., a variable which will generate a random UUID (Universally Unique Identifier) as its value when used -->
     <string name="variable_type_uuid">UUID</string>
     <!-- Description for type of variable: UUID, i.e., a variable which will generate a random UUID (Universally Unique Identifier) as its value when used -->
@@ -499,6 +507,10 @@
     <string name="label_url_encode">URL 编码</string>
     <!-- Checkbox label, for option to enable JSON encoding of a variable -->
     <string name="label_json_encode">JSON 编码</string>
+    <!-- Checkbox label, for option to enable/disable the exclusion of a variable's value in exports -->
+    <string name="label_exclude_variable_value_from_exports">将存储的值排除在导出文件之外</string>
+    <!-- Instructions shown below the "IExclude stored value from exports" checkbox in the variable editor -->
+    <string name="message_exclude_variable_value_from_exports_instructions">如果您不想将此变量的存储值(如果有的话) 包含在导出中，请启用此选项。</string>
     <!-- Section title, for section containing basic settings for a shortcut -->
     <string name="section_basic_variable_settings">基本设置</string>
     <!-- Error message, informing user that the entered variable name is empty -->
@@ -572,7 +584,7 @@
     <!-- Feature label for sharing text into the app, to be used in a specific variable for a configured shortcut -->
     <string name="action_send_to">发送到…</string>
     <!-- Error message, shown when user tries to share text into the app but there are no shortcuts configured to receive it -->
-    <string name="error_not_suitable_shortcuts">没有找到合适的快捷方式，要使用这个功能。你必须至少要有一个使用了共享变量的快捷方式。查阅文档中关于变量部分以获取更多信息。</string>
+    <string name="error_not_suitable_shortcuts">没找到合适的快捷方式。\n\n要使用此功能，您需要至少有一个快捷方式使用允许接收共享文本作为其值的变量，或者具有文件参数或使用文件作为其请求正文的快捷方式。\n\n单击变量部分中的帮助按钮以获取更多信息</string>
     <!-- Checkbox label, for enabling a variable to accept data sent to it via Android's "Share" feature -->
     <string name="label_allow_share_into">允许“共享”</string>
     <!-- Instructions shown below the "Allow Share…" checkbox in the variable editor -->
@@ -587,10 +599,14 @@
     <string name="button_export_to_general">文档</string>
     <!-- Dialog option on Export dialog, for exporting by sharing text to another app -->
     <string name="button_export_send_to">其他应用</string>
-    <!-- Dialog title when creating a new shortcut, shows options below -->
-    <string name="title_create_new_shortcut_options_dialog">新建快捷方式</string>
+    <!-- Instruction text, shown at the top of the screen when creating a new shortcut, shows options below -->
+    <string name="instructions_create_new_shortcut_options_dialog">选择您想要创建的快捷方式类型。</string>
     <!-- Option in dialog to create new shortcut: from scratch (i.e., start with a blank editor) -->
     <string name="button_create_new">新建快捷方式</string>
+    <!-- Button in shortcut creation screen, to select the type of shortcut: from scratch (i.e., start with a blank editor) -->
+    <string name="button_create_from_scratch">从头创建</string>
+    <!-- Section title, shown on shortcut creation screen, above the section that lets the user pick advanced shortcut types -->
+    <string name="section_title_advanced_shortcut_types">高级类型</string>
     <!-- Option in dialog to create new shortcut: from cURL command (i.e., parse a cURL command and prepopulate editor) -->
     <string name="button_curl_import">从 cURL 命令创建</string>
     <!-- Option in dialog to create new shortcut: create a browser shortcut, i.e., a shortcut that will open the external browser -->
@@ -621,10 +637,18 @@
     <string name="authentication_bearer">令牌认证</string>
     <!-- Label for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu, i.e., when long-pressing the app icon on the home screen -->
     <string name="label_launcher_shortcut">在主应用长按快捷菜单中显示方式</string>
-    <!-- Label for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu and it will be promoted as a Direct Share target, allowing easy sharing of content into that specific shortcut -->
-    <string name="label_launcher_shortcut_or_direct_share">允许通过直接分享、谷歌助手或作为启动器的应用快捷键进行触发</string>
+    <!-- Subtitle for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu -->
+    <string name="subtitle_launcher_shortcut">这也将允许通过第三方应用程序，例如谷歌助手或 Bixby Routines，使用快捷方式，</string>
+    <!-- Subtitle for option in shortcut editor, selecting it will cause the shortcut to appear in the launcher menu -->
+    <string name="subtitle_launcher_shortcut_with_direct_share">这也将允许通过第三方应用程序，例如谷歌助手或 Bixby Routines，或 Direct Share 使用快捷方式，</string>
     <!-- Label for option in shortcut editor, selecting it will cause a secondary app to appear in the device's launcher. This app will trigger the shortcut -->
     <string name="label_secondary_launcher_shortcut">允许通过第二启动器应用进行触发</string>
+    <!-- Subtitle for option in shortcut editor, selecting it will cause a secondary app to appear in the device's launcher. This app will trigger the shortcut -->
+    <string name="subtitle_secondary_launcher_shortcut">这主要在无法使用常规主屏幕部件的情况下有用。</string>
+    <!-- Label for option in shortcut editor, selecting it will enable the shortcut as a file sharing target, meaning it will be possible to share files from outside the app and use them as this shortcut's request body or as a parameter -->
+    <string name="label_shortcut_as_file_share_target">允许从共享对话框接收文件</string>
+    <!-- Subtitle for option in shortcut editor, selecting it will enable the shortcut as a file sharing target, meaning it will be possible to share files from outside the app and use them as this shortcut's request body or as a parameter -->
+    <string name="subtitle_shortcut_as_file_share_target">启用此选项允许你分享其他应用的文件并将其用于这个快捷键的请求主体或表单参数。</string>
     <!-- Label for option in shortcut editor, selecting it will cause the shortcut to appear as an option in the Quick Settings Tile of the app -->
     <string name="label_quick_tile_shortcut">允许通过快捷工具栏启动</string>
     <!-- error message displayed when something goes wrong (e.g. response too big) when trying to share/export a response/text -->
@@ -758,6 +782,8 @@
     <string name="action_type_change_icon_title">更改快捷方式图标</string>
     <!-- Shortcut Action Title: Change Shortcut Description -->
     <string name="action_type_change_icon_description">更改快捷方式描述</string>
+    <!-- Shortcut Action Title: Change Shortcut Visibility -->
+    <string name="action_type_change_shortcut_hidden_title">显示/隐藏快捷方式</string>
     <!-- Shortcut Action Title: Enqueue a shortcut, i.e., execute it after the current one finishes -->
     <string name="action_type_trigger_shortcut_title">启动此快捷方式</string>
     <!-- Shortcut Action Title: Execute another shortcut immediately and return its result -->
@@ -786,6 +812,8 @@
     <string name="error_action_type_send_wol_invalid_mac_address">无效的 MAC 地址：%s</string>
     <!-- Shortcut Action Title: Trigger a task in Tasker -->
     <string name="action_type_trigger_tasker_title">触发 Tasker 任务</string>
+    <!-- Shortcut Action Title: Enable or disable a tunnel in the Wireguard app -->
+    <string name="action_type_set_wireguard_tunnel_state_title">启用或禁用 Wireguard 隧道</string>
     <!-- Shortcut Action Title: Get the device's current (physical) location -->
     <string name="action_type_get_location_title">获取当前位置</string>
     <!-- Shortcut Action Description: Get the device's current (physical) location -->
@@ -800,6 +828,8 @@
     <string name="action_type_send_mqtt_message">发送 MQTT 消息</string>
     <!-- Shortcut Action Title: Abort the execution of the shortcut -->
     <string name="action_type_abort_execution">停止执行</string>
+    <!-- Shortcut Action Title: Abort the execution of the shortcut and instead run the steps as if the request had failed -->
+    <string name="action_type_abort_and_treat_as_failure">中止并视为失败</string>
     <!-- Shortcut Action Title: Wait for a number of milliseconds before continuing with the script execution -->
     <string name="action_type_wait">等待</string>
     <!-- Shortcut Action Title: Get the IP Address of the current Wi-Fi -->
@@ -933,7 +963,7 @@
     <string name="title_add_code_snippet">添加代码片段</string>
     <!-- Dialog option: shown in code snippet picker, shows options to get information about the current shortcut itself -->
     <string name="dialog_code_snippet_shortcut_info">快捷方式信息</string>
-    <!-- Dialog option: shown in code snippet picker, shows options to get information about the selected files -->
+    <!-- Dialog option: shown in code snippet picker, shows options to get information about the selected files and to interact with the file system -->
     <string name="dialog_code_snippet_files">所选的文件</string>
     <!-- Dialog option: shown in code snippet picker, shows options to get information about the HTTP response -->
     <string name="dialog_code_snippet_handle_response">查看返回结果</string>
@@ -953,6 +983,10 @@
     <string name="dialog_code_snippet_network">网络</string>
     <!-- Dialog option: shown in code snippet picker, option to get the ID of the current shortcut -->
     <string name="dialog_code_snippet_get_shortcut_id">获取快捷方式 ID</string>
+    <!-- Dialog option: shown in code snippet picker, option to read data from a file -->
+    <string name="dialog_code_snippet_read_from_file">从文件读取</string>
+    <!-- Dialog option: shown in code snippet picker, option to write data to a file -->
+    <string name="dialog_code_snippet_write_to_file">写入文件</string>
     <!-- Dialog option: shown in code snippet picker, option to get the name of a selected file -->
     <string name="dialog_code_snippet_get_file_name">获取所选文件的名称</string>
     <!-- Dialog option: shown in code snippet picker, option to get the type of a selected file -->
@@ -989,6 +1023,8 @@
     <string name="error_shortcut_not_found_for_triggering">无法执行快捷方式\"%1$s\"，快捷方式不存在</string>
     <!-- Error message: Shown in toast when "Rename Shortcut" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
     <string name="error_shortcut_not_found_for_renaming">无法重命名快捷方式\"%1$s\"，快捷方式不存在</string>
+    <!-- Error message: Shown in toast when "Set Shortcut Hidden" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
+    <string name="error_shortcut_not_found_for_set_visible">无法更改快捷方式\“%1$s\” 的可见性，因为它不存在。</string>
     <!-- Error message: Shown in toast when "Change Icon" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
     <string name="error_shortcut_not_found_for_changing_icon">不能更改快捷方式\"%1$s\"的图标，快捷方式不存在</string>
     <!-- Error message: Shown in toast when "Change Description" action cannot find the specified shortcut. %1$s is a placeholder for the shortcut's name -->
@@ -1051,10 +1087,14 @@
     <string name="error_text_too_long_for_variable">字符长度超出上限( %d )，无法插入变量占位符</string>
     <!-- Instructions: Shown in toast to inform user that they should select or create a shortcut to be placed on the home screen -->
     <string name="instructions_select_shortcut_for_home_screen">选择或创建快捷方式以将其放置于主屏幕上</string>
+    <!-- Instructions: Shown in info text at the top of the screen to inform user that they should select or create a shortcut, which is then used as by the 3rd party app (e.g. Tasker) -->
+    <string name="instructions_select_shortcut_for_plugin">选择或创建应触发的快捷方式。</string>
     <!-- Label: Shown when user selects a widget to place on the home screen, shown for the customizable widget (as opposite to the generic shortcut) -->
     <string name="label_widget">可制定的小部件</string>
     <!-- Label: Shown when configuring a widget, next to checkbox, allows to show/hide the label of a widget -->
     <string name="label_show_widget_label">显示标签</string>
+    <!-- Label: Shown when configuring a widget, next to checkbox, allows to show/hide the icon of a widget -->
+    <string name="label_show_widget_icon">显示图标</string>
     <!-- Action label: Shown on button to confirm the creation of a widget, after configuring it -->
     <string name="action_create_widget">创建小部件</string>
     <!-- Title: Configure Widget, shown when creating a widget and the user has some options to configure it -->
@@ -1188,7 +1228,7 @@
     <!-- Error message, shown when user declines location permission for Wi-Fi check -->
     <string name="error_missing_location_permission">无法获取位置权限。正在终止权限。</string>
     <!-- Message: Success message shown when a response was saved to a file -->
-    <string name="message_response_saved_to_file">响应未保存到文件。</string>
+    <string name="message_response_saved_to_file">响应已保存到文件。</string>
     <!-- Dialog title: Shown in progress dialog while a file is being saved -->
     <string name="saving_in_progress">正在保存…</string>
     <!-- Error message: Shown in dialog when user tries to enter an invalid URL for the remote edit feature -->
@@ -1271,6 +1311,8 @@
     <string name="action_type_parse_json">解析 JSON</string>
     <!-- Title of an action in the code snippet picker: Parse an XML string -->
     <string name="action_type_parse_xml">解析 XML</string>
+    <!-- Title of an action in the code snippet picker: Parse an HTML string -->
+    <string name="action_type_parse_html">解析 HTML</string>
     <!-- Title of dialog, shown when opening the app and unsaved changes to a previously edited shortcut were found, asking the user whether they want to recover it -->
     <string name="title_unsaved_changes_detected">找到了未保存的快捷方式</string>
     <!-- Message on dialog, shown when opening the app and unsaved changes to a previously edited shortcut were found, asking the user whether they want to recover it. %s is a placeholder for the shortcut's name -->
@@ -1279,8 +1321,6 @@
     <string name="message_unsaved_changes_detected_no_name">在快捷方式上找到未保存的更改。 你想恢复更改并继续编辑吗？</string>
     <!-- Button label, shown on dialog that asks user if they want to recover a shortcut that has unsaved changes -->
     <string name="button_recover">恢复</string>
-    <!-- Message displayed in notification while a shortcut is being executed that was triggered from Tasker -->
-    <string name="running_tasker_plugin">Tasker 正触发一个快捷方式</string>
     <!-- Button text: translate app (prompt to help & become a translator) -->
     <string name="settings_help_translate">成为译员</string>
     <!-- Summary/subtitle of section in settings that prompts user to help translate the app -->
@@ -1289,7 +1329,7 @@
     <string name="button_sort_variables">排序</string>
     <!-- Message: Shown in a snackbar after all variables have been sorted (alphabetically) -->
     <string name="message_variables_sorted">变量已排序。</string>
-    <!-- Button label on menu, for searching. Currently only used in Code Snippet picker but might be used to search in other places -->
+    <!-- Button label on menu, for searching. Used in Code Snippet picker and for Documentation screens -->
     <string name="menu_action_search">搜索</string>
     <!-- Generic message for empty state when a search yields no results, displayed in the middle of the screen -->
     <string name="instructions_search_no_results">无结果</string>
@@ -1313,12 +1353,16 @@
     <string name="error_failed_to_send_udp">发送 UDP 包失败: %s</string>
     <!-- Error message: Shown when the user tries to send a TCP packet via Scripting but it fails. %s is a placeholder for a more detailed error message -->
     <string name="error_failed_to_send_tcp">发送 TCP 包失败: %s</string>
+    <!-- Error message: Shown when the user tries to read a TCP response via Scripting but it fails. %s is a placeholder for a more detailed error message -->
+    <string name="error_failed_to_receive_tcp">从 TCP 套接字读取失败: %s</string>
     <!-- Error message: Shown when the user tries to open a file via the openUrl function in Scripting, which is not supported -->
     <string name="error_opening_files_using_open_url_not_supported">不支持用 openUrl() 打开文件</string>
     <!-- Page title, for page showing all events that happened recently -->
     <string name="title_event_history">事件历史</string>
     <!-- Button in Event History screen, to clear all events and empty the history -->
     <string name="button_clear_history">清除历史</string>
+    <!-- Button in Event History screen, to switch between showing absolute times and relative times -->
+    <string name="button_history_toggle_time_mode">切换时间模式</string>
     <!-- Message: Shown in snackbar after all events were deleted from the Event History -->
     <string name="message_history_cleared">历史已清除。</string>
     <!-- Empty state, shown in event history when there are no recent events -->
@@ -1504,6 +1548,12 @@
     <plurals name="subtitle_response_toolbar_actions">
         <item quantity="other">选中了 %d 个按钮</item>
     </plurals>
+    <!-- Option in settings, allows to set whether hidden shortcuts should be visible or not -->
+    <string name="settings_title_show_hidden_shortcuts">隐藏的快捷方式</string>
+    <!-- Option in "Hidden Shortcuts" selection in Setting screen, when selected all hidden shortcuts will be shown -->
+    <string name="settings_option_show_hidden_shortcuts">显示隐藏的快捷方式</string>
+    <!-- Option in "Hidden Shortcuts" selection in Setting screen, when selected no hidden shortcuts will be shown -->
+    <string name="settings_option_hide_hidden_shortcuts">不显示隐藏的快捷方式</string>
     <!-- Title of section in Settings screen, for section which contains experimental settings for new/unstable features -->
     <string name="settings_title_experimental">实验性</string>
     <!-- Option in experimental settings, let's the user pick how shortcuts should be executed -->
@@ -1544,4 +1594,104 @@
     <string name="icon_shape_round">圆形</string>
     <string name="termux_permission_has">已拥有Termux运行权限</string>
     <string name="termux_permission_fail">Termux请求授权失败</string>
+    <!-- Warning message shown to user when an HTML page wants to open a URL in the external browser. %s is a placeholder for the URL. -->
+    <string name="warning_page_wants_to_open_url">页面想要在浏览器中打开以下URL：\n\n%s</string>
+    <!-- Placeholder text shown in the text field for the search feature on the Documentation screen -->
+    <string name="placeholder_documentation_search_query">在页面中搜索…</string>
+    <!-- Label for dropdown in shortcut editor, for picking the font size in which the response should be displayed -->
+    <string name="label_font_size">字体大小</string>
+    <!-- Option in font size drop down: Tiny -->
+    <string name="font_size_tiny">极小</string>
+    <!-- Option in font size drop down: Very small -->
+    <string name="font_size_very_small">非常小</string>
+    <!-- Option in font size drop down: Small -->
+    <string name="font_size_small">小</string>
+    <!-- Option in font size drop down: Regular -->
+    <string name="font_size_regular">普通</string>
+    <!-- Option in font size drop down: Large -->
+    <string name="font_size_large">大</string>
+    <!-- Option in font size drop down: Very large -->
+    <string name="font_size_very_large">非常大</string>
+    <!-- Option in font size drop down: Huge -->
+    <string name="font_size_huge">巨大</string>
+    <!-- Dialog message, shown the first time the user uses the Wireguard integration, to help them set it up correctly -->
+    <string name="wireguard_setup_instructions">请确保在Wireguard应用中启用“允许远程控制应用”设置。</string>
+    <!-- Error message, shown to user when they use the Wireguard integration but do not grant the permission for it -->
+    <string name="wireguard_permission_not_granted">Wireguard权限未被授予。</string>
+    <!-- Button title, shown in Privacy section, for obtaining the device ID which should be included when making bug reports -->
+    <string name="settings_device_id">设备 ID</string>
+    <!-- Button subtitle, shown in Privacy section, for obtaining the device ID which should be included when making bug reports. %s is a placeholder for the ID, which is a random string of 20 characters -->
+    <string name="settings_device_id_summary">当你在 Github：\n%s 上报告故障时包括此 ID</string>
+    <!-- Snackbar message, shown when the user clicks the Device ID button in the Privacy section -->
+    <string name="message_device_id_copied">设备ID已复制到剪贴板。</string>
+    <!-- Message displayed in at the top of the Export screen, to instruct the user what to do -->
+    <string name="instructions_export">选择要导出的快捷方式。所有必需的变量都将被自动导出。</string>
+    <!-- Title shown on Response screen which allows to expand a panel showing some meta information about the response -->
+    <string name="title_response_meta_information">元信息</string>
+    <!-- Snackbar message, shown when the user switches the time mode on the Event History screen, to change the times to be displayed as absolute values (e.g. 13:37) -->
+    <string name="message_history_switched_to_absolute_times">已切换到绝对时间。</string>
+    <!-- Snackbar message, shown when the user switches the time mode on the Event History screen, to change the times to be displayed as absolute relative (e.g. 42 sec ago) -->
+    <string name="message_history_switched_to_relative_times">已切换到相对时间。</string>
+    <!-- Error message used as a fallback when the abortAndTreatAsFailure function is used but no custom error message was provided -->
+    <string name="error_user_defined">执行被中止并作为失败处理</string>
+    <!-- Accessibility description for main menu button -->
+    <string name="accessibility_main_menu">主菜单</string>
+    <!-- Accessibility description for the variable button on the right of text input fields -->
+    <string name="accessibility_variable_field_button">添加变量</string>
+    <!-- Label on button shown on the Response Handling screen, clicking it leads to a settings screen that lets the user configure how the response (or custom message) is displayed -->
+    <string name="button_display_settings">显示设置</string>
+    <!-- Subtitle on button shown on the Response Handling screen -->
+    <string name="subtitle_display_settings_for_response">配置响应的显示方式</string>
+    <!-- Subtitle on button shown on the Response Handling screen -->
+    <string name="subtitle_display_settings_for_message">配置消息的显示方式</string>
+    <!-- Subtitle on button shown on the Response Handling screen -->
+    <string name="subtitle_display_settings_for_error">配置错误消息的显示方式</string>
+    <!-- Title of screen that lets the user configure how the HTTP response is displayed -->
+    <string name="title_response_display">响应显示</string>
+    <!-- Title of screen that lets the user configure how their custom message is displayed -->
+    <string name="title_message_display">消息显示</string>
+    <!-- Title of a generic warning dialog. The dialog may be used in various situations. -->
+    <string name="warning_dialog_title">警告</string>
+    <!-- Message of warning dialog that shows when a request contains malformed JSON in its body -->
+    <string name="warning_message_malformed_json">您的请求正文包含无效的 JSON ，这可能会导致请求失败。\n\n%s</string>
+    <!-- Label for checkbox in editor, to allow JSON responses to be displayed as a table instead of plain JSON -->
+    <string name="label_json_array_as_table">以表格形式展示JSON数组</string>
+    <!-- Screen title, for the Directories screen, which lets the user configure directories that can be used to read and write files -->
+    <string name="title_working_directories">挂载的目录</string>
+    <!-- Option in main screen's menu, for the Directories screen, which lets the user configure directories that can be used to read and write files -->
+    <string name="menu_action_working_directories">目录</string>
+    <!-- Empty state, shown in list when there are no Directories yet -->
+    <string name="empty_state_working_directories">您尚未挂载任何目录。</string>
+    <!-- Empty state instructions, shown in list when there are no directories yet -->
+    <string name="empty_state_working_directories_instructions">在这里，您可以从您设备的文件系统挂载目录，允许应用程序访问它们的内容并在其中创建新的文件。\n\n单击+按钮以挂载一个目录。</string>
+    <!-- Message, shown in snackbar, to confirm to the user that a directory was created/mounted -->
+    <string name="message_working_directory_mounted">目录已挂载。</string>
+    <!-- Message, shown in snackbar, confirming to user that a directory was deleted. %1$s is a placeholder for the directory's name -->
+    <string name="working_directory_deleted">%1$s 已删除</string>
+    <!-- Action button label, shown in context menu of Directories screen, to allow re-mounting a directory, i.e., connecting it to a directory in the device's file system -->
+    <string name="button_mount_working_directory">挂载</string>
+    <!-- Generic action button label, shown in context menus, allows renaming things, e.g. directories -->
+    <string name="action_rename">重命名</string>
+    <!-- Subtitle shown below directory name on Directories screen, when a directory is not mounted, i.e., it is disconnected from its counterpart on the device's file system -->
+    <string name="working_directory_unmounted_subtitle">卸载</string>
+    <!-- Subtitle shown below directory name on Directories screen, to indicate when this directory was last read from or written to -->
+    <string name="working_directory_last_accessed">上次访问时间: %s</string>
+    <!-- Subtitle shown below directory name on Directories screen, to indicate that this directory was never read from or written to -->
+    <string name="working_directory_never_accessed">从未访问</string>
+    <!-- Instructions: Shown at the top of the Directories screen when picking a directory that should be used for a specific feature -->
+    <string name="instructions_select_directory">选择或挂载一个新目录以允许应用读取和写入其中的文件。</string>
+    <!-- Dialog prompt to ask user to confirm deletion of a directory -->
+    <string name="confirm_delete_working_directory_message">删除此目录挂载？文件系统上的实际目录将不会受影响，也不会删除任何文件。</string>
+    <!-- Title for the dialog window that lets the user rename a directory -->
+    <string name="title_rename_working_directory">重命名目录</string>
+    <!-- Error message, informing user that the entered directory name already exists -->
+    <string name="validation_directory_name_already_exists">另一个目录也是这个名称</string>
+    <!-- Action, shown on dropdown when editing a shortcut, for allowing to hide a shortcut -->
+    <string name="action_hide_shortcut">隐藏</string>
+    <!-- Action, shown on dropdown when editing a shortcut, for allowing to show a hidden shortcut -->
+    <string name="action_show_shortcut">显示</string>
+    <!-- Message, shown in snackbar, to confirm to the user that a shortcut was hidden -->
+    <string name="message_shortcut_hidden">已隐藏快捷方式。</string>
+    <!-- Message, shown in snackbar, to confirm to the user that a shortcut is no longer hidden and visible again -->
+    <string name="message_shortcut_visible">快捷方式不再隐藏。</string>
 </resources>

@@ -9,27 +9,31 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
 import ch.rmy.android.framework.extensions.truncate
 import ch.rmy.android.http_shortcuts.R
 import ch.rmy.android.http_shortcuts.components.FontSize
 import ch.rmy.android.http_shortcuts.components.HelpText
 import ch.rmy.android.http_shortcuts.components.Spacing
-import ch.rmy.android.http_shortcuts.extensions.rememberSyntaxHighlighter
+import ch.rmy.android.http_shortcuts.utils.rememberSyntaxHighlighter
+import ch.rmy.android.http_shortcuts.utils.syntaxHighlightingVisualTransformation
 
 @Composable
 fun CurlImportContent(
@@ -40,6 +44,10 @@ fun CurlImportContent(
 ) {
     val syntaxHighlighter = rememberSyntaxHighlighter("sh")
     val focusRequester = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
+    var focusRequested by remember {
+        mutableStateOf(false)
+    }
 
     Column(
         modifier = Modifier
@@ -54,9 +62,14 @@ fun CurlImportContent(
                 .fillMaxWidth()
                 .focusRequester(focusRequester)
                 .onGloballyPositioned {
-                    focusRequester.requestFocus()
+                    if (!focusRequested) {
+                        focusRequested = true
+                        focusRequester.requestFocus()
+                        keyboard?.show()
+                    }
                 }
-                .weight(1f),
+                .weight(1f)
+                .clearAndSetSemantics { },
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.None,
                 autoCorrect = false,
@@ -70,9 +83,7 @@ fun CurlImportContent(
             ),
             value = inputText,
             onValueChange = onInputTextChanged,
-            visualTransformation = {
-                TransformedText(syntaxHighlighter.format(it.text), OffsetMapping.Identity)
-            },
+            visualTransformation = syntaxHighlightingVisualTransformation(syntaxHighlighter, inputText),
         )
 
         if (unsupportedOptions.isNotEmpty()) {

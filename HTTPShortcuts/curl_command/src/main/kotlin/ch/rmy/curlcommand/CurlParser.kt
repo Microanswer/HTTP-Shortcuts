@@ -10,6 +10,8 @@ class CurlParser private constructor(arguments: List<String>) {
         val args = arguments.toMutableList()
         val iterator = args.listIterator()
         var urlFound = false
+        var wasNoParamArgument = false
+        var spaceInjected = false
         loop@ while (iterator.hasNext()) {
             val index = iterator.nextIndex()
             var argument = iterator.next()
@@ -18,12 +20,22 @@ class CurlParser private constructor(arguments: List<String>) {
                 continue
             }
 
+            if (wasNoParamArgument && spaceInjected) {
+                argument = "-$argument"
+            }
+
             if (argument.startsWith("-") && !argument.startsWith("--") && argument.length > 2) {
                 val argumentParameter = argument.substring(2)
                 argument = argument.substring(0, 2)
+                spaceInjected = true
                 iterator.add(argumentParameter)
                 iterator.previous()
+            } else {
+                spaceInjected = false
             }
+
+            wasNoParamArgument = false
+
 
             // arguments with 1 parameter
             if (iterator.hasNext()) {
@@ -89,6 +101,10 @@ class CurlParser private constructor(arguments: List<String>) {
                         }
                         continue@loop
                     }
+                    "--digest" -> {
+                        builder.isDigestAuth()
+                        continue@loop
+                    }
                     "-A", "--user-agent" -> {
                         builder.header("User-Agent", iterator.next())
                         continue@loop
@@ -105,12 +121,26 @@ class CurlParser private constructor(arguments: List<String>) {
             }
 
             // arguments with 0 parameters
+            wasNoParamArgument = argument.startsWith("-") && !argument.startsWith("--")
             when (argument) {
                 "-G", "--get" -> {
                     builder.forceGet()
                     continue@loop
                 }
+                "-k", "--insecure" -> {
+                    builder.insecure()
+                    continue@loop
+                }
+                "-s", "--silent" -> {
+                    builder.silent()
+                    continue@loop
+                }
+                "-I", "--head" -> {
+                    builder.method("HEAD")
+                    continue@loop
+                }
             }
+            wasNoParamArgument = false
 
             if (argument.startsWith("http:", ignoreCase = true) || argument.startsWith("https:", ignoreCase = true)) {
                 urlFound = true
@@ -145,6 +175,7 @@ class CurlParser private constructor(arguments: List<String>) {
             "--data-binary",
             "--data-urlencode",
             "--data-raw",
+            "--digest",
             "-F",
             "--form",
             "-m",
@@ -159,6 +190,12 @@ class CurlParser private constructor(arguments: List<String>) {
             "--referer",
             "-G",
             "--get",
+            "-k",
+            "--insecure",
+            "-s",
+            "--silent",
+            "--head",
+            "-I",
         )
     }
 }

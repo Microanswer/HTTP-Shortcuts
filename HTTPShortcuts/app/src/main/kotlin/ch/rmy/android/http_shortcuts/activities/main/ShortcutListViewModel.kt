@@ -144,22 +144,33 @@ constructor(
         )
     }
 
+    override suspend fun onReactivated() {
+        recomputeShortcutList()
+    }
+
     private suspend fun recomputeShortcutList() {
         updateViewState {
             copy(shortcuts = mapShortcuts())
         }
     }
 
-    private fun mapShortcuts(): List<ShortcutItem> =
-        category.shortcuts.map { shortcut ->
-            ShortcutItem(
-                id = shortcut.id,
-                name = shortcut.name,
-                description = shortcut.description,
-                icon = shortcut.icon,
-                isPending = pendingShortcuts.any { it.shortcutId == shortcut.id },
-            )
-        }
+    private fun mapShortcuts(): List<ShortcutItem> {
+        val includeHidden = settings.showHiddenShortcuts
+        return category.shortcuts
+            .mapNotNull { shortcut ->
+                if (!includeHidden && shortcut.hidden) {
+                    return@mapNotNull null
+                }
+                ShortcutItem(
+                    id = shortcut.id,
+                    name = shortcut.name,
+                    description = shortcut.description,
+                    icon = shortcut.icon,
+                    isPending = pendingShortcuts.any { it.shortcutId == shortcut.id },
+                    isHidden = shortcut.hidden,
+                )
+            }
+    }
 
     private suspend fun updateLauncherSettings() {
         withContext(Dispatchers.Default) {
@@ -170,7 +181,7 @@ constructor(
     }
 
     fun onShortcutClicked(shortcutId: ShortcutId) = runAction {
-        logInfo("Shortcut clicked")
+        logInfo("Shortcut clicked (selectionMode = ${initData.selectionMode}")
         if (initData.selectionMode != SelectionMode.NORMAL) {
             selectShortcut(shortcutId)
             skipAction()
@@ -215,6 +226,7 @@ constructor(
             ShortcutListDialogState.ContextMenu(
                 shortcutName = shortcut.name,
                 isPending = pendingShortcuts.any { it.shortcutId == shortcut.id },
+                isHidden = shortcut.hidden,
             )
         )
     }
@@ -271,13 +283,28 @@ constructor(
 
     fun onMoveOptionSelected() = runAction {
         updateDialogState(null)
-        navigate(NavigationDestination.MoveShortcuts)
+        val shortcutId = activeShortcutId ?: skipAction()
+        navigate(NavigationDestination.MoveShortcuts.buildRequest(shortcutId))
     }
 
     fun onDuplicateOptionSelected() = runAction {
         updateDialogState(null)
         val shortcutId = activeShortcutId ?: skipAction()
         duplicateShortcut(shortcutId)
+    }
+
+    fun onShowSelected() = runAction {
+        updateDialogState(null)
+        val shortcutId = activeShortcutId ?: skipAction()
+        shortcutRepository.setHidden(shortcutId, false)
+        showSnackbar(R.string.message_shortcut_visible)
+    }
+
+    fun onHideSelected() = runAction {
+        updateDialogState(null)
+        val shortcutId = activeShortcutId ?: skipAction()
+        shortcutRepository.setHidden(shortcutId, true)
+        showSnackbar(R.string.message_shortcut_hidden)
     }
 
     private suspend fun ViewModelScope<*>.duplicateShortcut(shortcutId: ShortcutId) {

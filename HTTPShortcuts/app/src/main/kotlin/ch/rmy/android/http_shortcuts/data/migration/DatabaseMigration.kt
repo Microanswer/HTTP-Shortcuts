@@ -13,6 +13,7 @@ import ch.rmy.android.http_shortcuts.data.migration.migrations.RequireConfirmati
 import ch.rmy.android.http_shortcuts.data.migration.migrations.ResponseActionMigration
 import ch.rmy.android.http_shortcuts.data.migration.migrations.ResponseHandlingMigration
 import ch.rmy.android.http_shortcuts.data.migration.migrations.UniqueIdsMigration
+import ch.rmy.android.http_shortcuts.data.migration.migrations.WorkingDirectoryMigration
 import io.realm.kotlin.dynamic.getNullableValue
 import io.realm.kotlin.dynamic.getValue
 import io.realm.kotlin.migration.AutomaticSchemaMigration
@@ -151,7 +152,7 @@ class DatabaseMigration : AutomaticSchemaMigration {
         }
 
         // 1.30.0
-        if (oldVersion < 37) {
+        if (oldVersion == 36L) {
             migrationContext.enumerate("Widget") { _, newWidget ->
                 newWidget?.set("showLabel", true)
             }
@@ -175,7 +176,7 @@ class DatabaseMigration : AutomaticSchemaMigration {
         // 2.4.0
         if (oldVersion == 44L) {
             migrationContext.enumerate("Shortcut") { oldShortcut, newShortcut ->
-                val clientCertAlias = oldShortcut.getNullableValue<String>("clientCertAlias")
+                val clientCertAlias = oldShortcut.getString("clientCertAlias")
                 if (!clientCertAlias.isNullOrEmpty()) {
                     newShortcut?.set("clientCert", "alias:$clientCertAlias")
                 }
@@ -259,6 +260,16 @@ class DatabaseMigration : AutomaticSchemaMigration {
             FileUploadTypeMigration().migrateRealm(migrationContext)
         }
 
+        if (oldVersion in (58 until 78)) {
+            WorkingDirectoryMigration().migrateRealm(migrationContext)
+        }
+
+        if (oldVersion < 80 && oldVersion >= 36) {
+            migrationContext.enumerate("Widget") { _, newWidget ->
+                newWidget?.set("showIcon", true)
+            }
+        }
+
         // update version number
         newRealm.query("Base")
             .first()
@@ -270,7 +281,7 @@ class DatabaseMigration : AutomaticSchemaMigration {
     }
 
     companion object {
-        const val VERSION = 74L
-        const val COMPATIBILITY_VERSION = 71L
+        const val VERSION = 81L
+        const val COMPATIBILITY_VERSION = 78L
     }
 }

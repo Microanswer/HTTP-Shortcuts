@@ -24,6 +24,44 @@ class CurlConstructorTest {
     }
 
     @Test
+    fun testDigestAuth() {
+        val curlCommand = CurlCommand.Builder()
+            .isDigestAuth()
+            .username("user")
+            .password("password123")
+            .url("http://example.com")
+            .build()
+
+        val expected = "curl http://example.com --digest -u user:password123"
+        val actual = CurlConstructor.toCurlCommandString(curlCommand)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `insecure flag`() {
+        val curlCommand = CurlCommand.Builder()
+            .insecure()
+            .url("http://example.com")
+            .build()
+
+        val expected = "curl http://example.com --insecure"
+        val actual = CurlConstructor.toCurlCommandString(curlCommand)
+        assertEquals(expected, actual)
+    }
+
+    @Test
+    fun `silent flag`() {
+        val curlCommand = CurlCommand.Builder()
+            .silent()
+            .url("http://example.com")
+            .build()
+
+        val expected = "curl http://example.com --silent"
+        val actual = CurlConstructor.toCurlCommandString(curlCommand)
+        assertEquals(expected, actual)
+    }
+
+    @Test
     fun testCurlConstructorParsed() {
         val originalCommand = CurlCommand.Builder()
             .method("POST")
@@ -34,6 +72,7 @@ class CurlConstructorTest {
             .header("Key", "Value")
             .header("Key2", "Value2")
             .proxy("192.168.1.42", 1337)
+            .insecure()
             .url("http://example.com")
             .build()
 
@@ -50,5 +89,6 @@ class CurlConstructorTest {
         assertEquals(originalCommand.headers, parsedCommand.headers)
         assertEquals(originalCommand.proxyHost, parsedCommand.proxyHost)
         assertEquals(originalCommand.proxyPort, parsedCommand.proxyPort)
+        assertEquals(originalCommand.insecure, parsedCommand.insecure)
     }
 }

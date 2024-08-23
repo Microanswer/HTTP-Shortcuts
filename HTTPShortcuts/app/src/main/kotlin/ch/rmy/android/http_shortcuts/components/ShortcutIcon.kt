@@ -1,16 +1,18 @@
 package ch.rmy.android.http_shortcuts.components
 
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import ch.rmy.android.http_shortcuts.R
+import ch.rmy.android.http_shortcuts.extensions.runIf
 import ch.rmy.android.http_shortcuts.icons.ShortcutIcon
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -19,6 +21,7 @@ import coil.request.ImageRequest
 fun ShortcutIcon(
     shortcutIcon: ShortcutIcon,
     modifier: Modifier = Modifier,
+    contentDescription: String? = null,
     size: Dp = 44.dp,
 ) {
     val context = LocalContext.current
@@ -39,10 +42,13 @@ fun ShortcutIcon(
 
     AsyncImage(
         model = model,
-        contentDescription = stringResource(R.string.icon_description),
+        contentDescription = contentDescription,
         colorFilter = tint?.let { ColorFilter.tint(tint) },
         modifier = Modifier
             .size(width = size, height = size)
-            .then(modifier),
+            .then(modifier)
+            .runIf(shortcutIcon.isCircular) {
+                clip(CircleShape)
+            },
     )
 }

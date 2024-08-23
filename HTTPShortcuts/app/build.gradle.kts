@@ -9,20 +9,13 @@ import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-kapt")
+    alias(libs.plugins.ksp)
     id("com.bugsnag.android.gradle")
     id("io.realm.kotlin")
     id("de.mobilej.unmock")
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.compose.compiler)
 }
-
-val coroutinesVersion: String by properties
-val gsonVersion: String by properties
-val okHttpVersion: String by properties
-val kotlinTestJunit5Version: String by properties
-val mockkVersion: String by properties
-val androidCoreKtxTestVersion: String by properties
-val hiltVersion: String by properties
 
 val bugsnagAPIKey: String by rootProject.ext
 val autoBuildDocs: Boolean by rootProject.ext
@@ -48,7 +41,6 @@ android {
     compileSdk = 34
 
     kotlinOptions {
-        languageVersion = "1.6"
         jvmTarget = "1.8"
     }
 
@@ -59,13 +51,13 @@ android {
 
     defaultConfig {
         applicationId = "ch.rmy.android.http_shortcuts"
-        minSdk = 21
-        targetSdk = 33
+        minSdk = 23
+        targetSdk = 34
 
         // Version name and code must remain as literals so that F-Droid can read them
-        versionName = "3.9.0"
+        versionName = "3.17.0"
         // 11,(2 digits major),(2 digits minor),(2 digits patch),(2 digits build)
-        versionCode = 1103090000
+        versionCode = 1103170000
 
         buildConfigField("String", "BUGSNAG_API_KEY", "\"$bugsnagAPIKey\"")
         buildConfigField("String", "BUILD_TIMESTAMP", "\"${rootProject.ext["buildTimestamp"]}\"")
@@ -171,10 +163,6 @@ android {
         shaders = false
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
-
     packaging {
         jniLibs {
             excludes.add("META-INF/*")
@@ -241,85 +229,96 @@ bugsnag {
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-    implementation(project(path = ":framework"))
+    coreLibraryDesugaring(libs.desugar)
+    implementation(libs.kotlin.stdlib)
 
     /* Dependency Injection */
-    implementation("com.google.dagger:hilt-android:$hiltVersion")
-    kapt("com.google.dagger:hilt-android-compiler:$hiltVersion")
-    implementation("androidx.hilt:hilt-work:1.1.0")
-    kapt("androidx.hilt:hilt-compiler:1.1.0")
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    ksp(libs.androidx.hilt.compiler)
+    implementation(libs.androidx.hilt.work)
+    implementation(libs.hilt.navigation.compose)
 
     /* Support libraries */
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.core)
+    implementation(libs.androidx.annotation)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.preference)
+    implementation(libs.androidx.lifecycle.viewmodel)
+    implementation(libs.androidx.splashscreen)
+
+    /* Database */
+    implementation(libs.realm)
 
     /* Color picker */
-    implementation("com.github.skydoves:colorpickerview:2.3.0")
+    implementation(libs.colorpickerview)
 
     /* Compose */
-    implementation(platform("androidx.compose:compose-bom:2023.10.01"))
-    implementation("androidx.compose.material3:material3:1.2.0-alpha09")
-    implementation("androidx.navigation:navigation-compose:2.7.5")
-    implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
-    implementation("androidx.activity:activity-compose:1.8.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
-    implementation("org.burnoutcrew.composereorderable:reorderable:0.9.6")
-    implementation("com.github.qawaz:compose-code-editor:2.0.3")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.materialIconsExtended)
+    implementation(libs.androidx.compose.uiToolingPreview)
+    debugImplementation(libs.androidx.compose.uiTooling)
+    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.reorderable)
+    implementation(libs.composeCodeEditor)
+    implementation(libs.composableTable)
+    implementation(libs.accompanist.systemuicontroller)
 
     /* Image cropping */
-    implementation("com.github.yalantis:ucrop:2.2.8")
+    implementation(libs.ucrop)
 
     /* Image display */
-    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation(libs.coil.compose)
+    implementation(libs.zoomable)
 
     /* Image meta data extraction */
-    implementation("androidx.exifinterface:exifinterface:1.3.6")
+    implementation(libs.androidx.exifinterface)
 
     /* HTTP & Network */
-    implementation("com.squareup.okhttp3:okhttp:$okHttpVersion")
-    implementation("org.brotli:dec:0.1.2")
-    implementation("io.github.rburgst:okhttp-digest:3.1.0")
-    implementation("com.github.franmontiel:PersistentCookieJar:v1.0.1")
-    implementation("org.conscrypt:conscrypt-android:2.5.2")
+    implementation(libs.okhttp3)
+    implementation(libs.brotli)
+    implementation(libs.okhttpDigest)
+    implementation(libs.persistentCookieJar)
+    implementation(libs.conscrypt)
 
     /* Custom Tabs (for Browser Shortcuts) */
-    implementation("androidx.browser:browser:1.7.0")
+    implementation(libs.androidx.browser)
+
+    /* HTML parsing */
+    implementation(libs.jsoup)
 
     /* Permissions */
-    implementation("com.markodevcic:peko:2.2.0")
+    implementation(libs.peko)
 
     /* Scheduling */
-    implementation("androidx.work:work-runtime-ktx:2.8.1")
+    implementation(libs.androidx.work.runtime)
 
     /* Tasker integration */
-    implementation("com.joaomgcd:taskerpluginlibrary:0.4.10")
+    implementation(libs.taskerplugin)
 
     /* Scripting */
-    // This is not the latest version, but it's the latest one that has a published artifact, and the newer ones lead to
-    // a larger build size without adding significant benefits, so I'm keeping this at the old version for now
-    implementation("com.github.LiquidPlayer:LiquidCore:0.6.2")
+    implementation(libs.liquidcore)
 
     /* Location lookup (for Scripting) */
-    debugImplementation("com.google.android.gms:play-services-location:21.0.1")
-    "releaseFullImplementation"("com.google.android.gms:play-services-location:21.0.1")
+    debugImplementation(libs.playServices.location)
+    "releaseFullImplementation"(libs.playServices.location)
 
     /* Biometric confirmation */
-    implementation("androidx.biometric:biometric:1.2.0-alpha05")
+    implementation(libs.androidx.biometric)
 
     /* MQTT (for Scripting) */
-    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+    implementation(libs.paho.mqtt)
 
     /* Password hashing */
-    implementation("org.mindrot:jbcrypt:0.4")
+    implementation(libs.jbcrypt)
 
     /* Crash Reporting */
-    "releaseFullImplementation"("com.bugsnag:bugsnag-android:5.31.3")
+    "releaseFullImplementation"(libs.bugsnag.android)
 
     /* cURL import & export */
     implementation(project(path = ":curl_command"))
@@ -328,17 +327,16 @@ dependencies {
     implementation(project(path = ":favicon_grabber"))
 
     /* JSON serialization & deserialization */
-    implementation("com.google.code.gson:gson:$gsonVersion")
+    implementation(libs.gson)
+
+    /* Google Assistant integration */
+    "releaseFullImplementation"(libs.androidx.googleShortcuts)
 
     /* Testing */
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:$kotlinTestJunit5Version")
-    testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("androidx.test:core-ktx:$androidCoreKtxTestVersion")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
-}
-
-kapt {
-    correctErrorTypes = true
+    testImplementation(libs.kotlin.test.junit5)
+    testImplementation(libs.mockk)
+    testImplementation(libs.androidx.test)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
 
 fun generateHtmlFromMarkdown(inputFile: String, outputFile: String, templateFile: String, mutate: String.() -> String = { this }) {
@@ -380,6 +378,7 @@ tasks.register("syncDocumentation") {
     val files = listOf(
         "advanced",
         "categories",
+        "directories",
         "documentation",
         "execution-flow",
         "faq",

@@ -24,8 +24,8 @@ h4 {
 ul {
     padding-left: 1em;
 }
-li {
-    font-size: 1em;
+ul > li > a {
+    font-size: 1.07em;
 }
 a {
     color: #487092;
@@ -112,6 +112,19 @@ tbody tr:last-child td:last-child {
 }
 table thead + tbody tr:first-child td {
     border-radius: 0 !important;
+}
+
+blockquote {
+    border: 1px solid #059df7;
+    border-radius: 5px;
+    background: #f0f9ff;
+    margin: 0;
+    padding: 0px 16px;
+}
+
+.dark blockquote {
+    border: 1px solid #059df7;
+    background: #062a40;
 }
 
 .dark code, .dark pre, .dark th {

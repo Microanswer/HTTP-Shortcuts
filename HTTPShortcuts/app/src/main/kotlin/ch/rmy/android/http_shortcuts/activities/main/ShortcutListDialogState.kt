@@ -23,15 +23,16 @@ sealed class ShortcutListDialogState {
     ) : ShortcutListDialogState()
 
     @Stable
-    object ExportOptions : ShortcutListDialogState()
+    data object ExportOptions : ShortcutListDialogState()
 
     @Stable
-    object ExportDestinationOptions : ShortcutListDialogState()
+    data object ExportDestinationOptions : ShortcutListDialogState()
 
     @Stable
     data class ContextMenu(
         val shortcutName: String,
         val isPending: Boolean,
+        val isHidden: Boolean,
     ) : ShortcutListDialogState()
 
     @Stable
@@ -40,5 +41,5 @@ sealed class ShortcutListDialogState {
     ) : ShortcutListDialogState()
 
     @Stable
-    object ExportProgress : ShortcutListDialogState()
+    data object ExportProgress : ShortcutListDialogState()
 }

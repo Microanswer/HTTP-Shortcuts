@@ -19,12 +19,15 @@ constructor(
     context: Context,
 ) : PreferencesStore(context) {
 
-    val userId: String
-        get() = getString(KEY_USER_ID)
+    val deviceId: String
+        get() = getString(DEVICE_ID)
             ?: run {
                 UUIDUtils.newUUID()
+                    .uppercase()
+                    .replace("-", "")
+                    .take(20)
                     .also {
-                        putString(KEY_USER_ID, it)
+                        putString(DEVICE_ID, it)
                     }
             }
 
@@ -36,6 +39,12 @@ constructor(
         get() = ShortcutClickBehavior.parse(getString(KEY_CLICK_BEHAVIOR))
         set(value) {
             putString(KEY_CLICK_BEHAVIOR, value.type)
+        }
+
+    var showHiddenShortcuts: Boolean
+        get() = getBoolean(KEY_SHOW_HIDDEN_SHORTCUTS)
+        set(value) {
+            putBoolean(KEY_SHOW_HIDDEN_SHORTCUTS, value)
         }
 
     var isCrashReportingAllowed: Boolean
@@ -55,6 +64,14 @@ constructor(
     var isNetworkRestrictionWarningPermanentlyHidden: Boolean
         get() = getBoolean(KEY_NETWORK_RESTRICTION_PERMANENTLY_HIDDEN)
         set(hidden) = putBoolean(KEY_NETWORK_RESTRICTION_PERMANENTLY_HIDDEN, hidden)
+
+    var isExternalUrlWarningPermanentlyHidden: Boolean
+        get() = getBoolean(KEY_EXTERNAL_URL_WARNING_PERMANENTLY_HIDDEN)
+        set(hidden) = putBoolean(KEY_EXTERNAL_URL_WARNING_PERMANENTLY_HIDDEN, hidden)
+
+    var isMalformedJsonWarningPermanentlyHidden: Boolean
+        get() = getBoolean(KEY_MALFORMED_JSON_WARNING_PERMANENTLY_HIDDEN)
+        set(hidden) = putBoolean(KEY_MALFORMED_JSON_WARNING_PERMANENTLY_HIDDEN, hidden)
 
     var changeLogLastVersion: String?
         get() = getString(KEY_CHANGE_LOG_LAST_VERSION)
@@ -98,6 +115,10 @@ constructor(
             putString(KEY_COLOR_THEME, newValue)
         }
 
+    var useRelativeTimesInHistory: Boolean
+        get() = getBoolean(KEY_HISTORY_USE_RELATIVE_TIMES)
+        set(value) = putBoolean(KEY_HISTORY_USE_RELATIVE_TIMES, value)
+
     private val _colorThemeFlow = MutableStateFlow(colorTheme)
     val colorThemeFlow = _colorThemeFlow.asStateFlow()
 
@@ -109,14 +130,16 @@ constructor(
         const val DARK_THEME_OFF = "off"
         const val DARK_THEME_AUTO = "auto"
 
-        private const val KEY_USER_ID = "user_id"
+        private const val DEVICE_ID = "device_id"
         private const val KEY_LANGUAGE = "language"
         private const val KEY_CLICK_BEHAVIOR = "click_behavior"
+        private const val KEY_SHOW_HIDDEN_SHORTCUTS = "show_hidden_shortcuts"
         private const val KEY_CRASH_REPORTING = "crash_reporting"
         private const val KEY_IMPORT_URL = "import_url"
         private const val KEY_CHANGE_LOG_PERMANENTLY_HIDDEN = "change_log_permanently_hidden"
         private const val KEY_CHANGE_LOG_LAST_VERSION = "change_log_last_seen_version"
         private const val KEY_NETWORK_RESTRICTION_PERMANENTLY_HIDDEN = "network_restriction_permanently_hidden"
+        private const val KEY_EXTERNAL_URL_WARNING_PERMANENTLY_HIDDEN = "external_url_warning_permanently_hidden"
         private const val KEY_REMOTE_EDIT_SERVER = "remote_edit_server"
         private const val KEY_REMOTE_EDIT_DEVICE_ID = "remote_edit_device_id"
         private const val KEY_REMOTE_EDIT_PASSWORD = "remote_edit_password"
@@ -125,5 +148,7 @@ constructor(
         private const val KEY_USER_AGENT = "user_agent"
         private const val KEY_EXPERIMENTAL_EXECUTION_MODE = "experimental_execution_mode"
         private const val KEY_COLOR_THEME = "color_theme"
+        private const val KEY_HISTORY_USE_RELATIVE_TIMES = "history_relative_times"
+        private const val KEY_MALFORMED_JSON_WARNING_PERMANENTLY_HIDDEN = "malformed_json_warning_permanently_hidden"
     }
 }

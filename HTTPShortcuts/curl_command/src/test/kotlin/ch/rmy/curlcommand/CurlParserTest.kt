@@ -21,6 +21,7 @@ class CurlParserTest {
         assertEquals(listOf("This is my \"data\""), command.data)
         assertEquals("foo", command.username)
         assertEquals("bar", command.password)
+        assertFalse(command.isDigestAuth)
         assertEquals("192.168.1.42", command.proxyHost)
         assertEquals(1337, command.proxyPort)
     }
@@ -76,6 +77,16 @@ class CurlParserTest {
         assertEquals("POST", command.method)
         assertEquals("foo", command.username)
         assertEquals("bar", command.password)
+    }
+
+    @Test
+    fun `no space between arguments that have no parameter`() {
+        val target = "curl -kX POST foo"
+        val command = CurlParser.parse(target)
+
+        assertEquals("http://foo", command.url)
+        assertEquals("POST", command.method)
+        assertTrue(command.insecure)
     }
 
     @Test
@@ -181,5 +192,36 @@ class CurlParserTest {
         val command = CurlParser.parse(target)
 
         assertEquals("http://foo?test=lol&username=myuser", command.url)
+    }
+
+    @Test
+    fun testDigestAuth() {
+        val target = "curl --digest --user foo:bar"
+        val command = CurlParser.parse(target)
+
+        assertEquals("foo", command.username)
+        assertEquals("bar", command.password)
+        assertTrue(command.isDigestAuth)
+    }
+
+    @Test
+    fun `insecure flag`() {
+        val target = "curl -k foo"
+        val command = CurlParser.parse(target)
+        assertTrue(command.insecure)
+    }
+
+    @Test
+    fun `silent flag`() {
+        val target = "curl -s foo"
+        val command = CurlParser.parse(target)
+        assertTrue(command.silent)
+    }
+
+    @Test
+    fun `head flag`() {
+        val target = "curl --head foo"
+        val command = CurlParser.parse(target)
+        assertEquals("HEAD", command.method)
     }
 }

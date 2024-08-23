@@ -8,6 +8,7 @@ import ch.rmy.android.http_shortcuts.data.domains.variables.VariableRepository
 import ch.rmy.android.http_shortcuts.data.enums.ParameterType
 import ch.rmy.android.http_shortcuts.data.enums.RequestBodyType
 import ch.rmy.android.http_shortcuts.data.enums.ShortcutAuthenticationType
+import ch.rmy.android.http_shortcuts.data.models.ResponseHandling
 import ch.rmy.android.http_shortcuts.data.models.Shortcut
 import ch.rmy.android.http_shortcuts.extensions.resolve
 import ch.rmy.android.http_shortcuts.http.HttpHeaders
@@ -40,6 +41,9 @@ constructor(
             .runIf(shortcut.authenticationType.usesUsernameAndPassword) {
                 username(rawPlaceholdersToResolvedValues(shortcut.username, variableValues))
                     .password(rawPlaceholdersToResolvedValues(shortcut.password, variableValues))
+                    .runIf(shortcut.authenticationType == ShortcutAuthenticationType.DIGEST) {
+                        isDigestAuth()
+                    }
             }
             .runIf(shortcut.authenticationType == ShortcutAuthenticationType.BEARER) {
                 header(HttpHeaders.AUTHORIZATION, "Bearer ${shortcut.authToken}")
@@ -91,6 +95,16 @@ constructor(
             .runIf(shortcut.usesCustomBody()) {
                 header(HttpHeaders.CONTENT_TYPE, shortcut.contentType.ifEmpty { Shortcut.DEFAULT_CONTENT_TYPE })
                     .data(rawPlaceholdersToResolvedValues(shortcut.bodyContent, variableValues))
+            }
+            .runIf(shortcut.acceptAllCertificates) {
+                insecure()
+            }
+            .runIf(
+                shortcut.responseHandling?.run {
+                    successOutput == ResponseHandling.SUCCESS_OUTPUT_NONE && failureOutput == ResponseHandling.FAILURE_OUTPUT_NONE
+                } == true
+            ) {
+                silent()
             }
             .build()
 }

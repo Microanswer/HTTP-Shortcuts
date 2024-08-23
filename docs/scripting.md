@@ -19,7 +19,7 @@ Using these code blocks, there are a number of things you can achieve. See the [
 
 You can access the response of your HTTP request via the `response` object.
 
-Please note that the `response` object is only available in the *"Run on Success"* code block, and will otherwise be `null`.
+> Please note that the `response` object is only available in the *"Run on Success"* code block, as well as in the *"Run on Failure"* code block in case there was an HTTP response (i.e., a status code of 4xx or 5xx), and will otherwise be `null`.
 
 ### Getting the Response Body
 
@@ -27,6 +27,12 @@ The response body is available as a string via `response.body`.
 
 ```js
 const myBody = response.body;
+```
+
+If you know that the response body is in JSON format, you can use `JSON.parse()` to turn it into a JS object, array or primitive.
+
+```js
+const myJson = JSON.parse(response.body);
 ```
 
 <a name="response-headers"></a>
@@ -87,7 +93,7 @@ You can access the value of any of your variables via the `getVariable()` functi
 const myValue = getVariable('myVariable');
 ```
 
-Please note that the returned value will always be a string. If the variable does not exist an error is raised.
+> Please note that the returned value will always be a string. If the variable does not exist an error is raised.
 
 <a name="set-variable"></a>
 ### setVariable
@@ -98,7 +104,9 @@ You can store a value as a string into a variable via the `setVariable()` functi
 setVariable('myVariable', 'Hello World');
 ```
 
-Please note that there is a size limit of 30000 characters. If the variable does not exist an error is raised.
+> Please note that there is a size limit of 30'000 characters. If you set a value larger than that, it will be used unaltered for the current execution, but the value that is stored will be truncated.
+
+> If the variable does not exist an error is raised.
 
 As an optional third parameter you can pass a boolean. If it is `true`, the new value will be stored but not used immediately for the current execution. This is useful for variable types which support the 'Remember value' feature (such as Date Input, Time Input, Text Input, etc.) as it allows to change the stored previous value which is used as the default selected value.
 
@@ -109,17 +117,22 @@ setVariable('myVariable', 'Hello World', true); // only changes the stored value
 <a name="shortcut-info"></a>
 ## Getting Information about the Current Shortcut
 
-You can easily retrieve information about the current shortcut from the `shortcut` object. Currently this only includes the shortcut's ID, name and description.
+You can easily retrieve information about the current shortcut and the category it belongs to from the `shortcut` object. This includes the shortcut's ID, name, description and whether it is hidden, as well as its category's ID and name.
 
 ```js
 shortcut.id;
 shortcut.name;
 shortcut.description;
+shortcut.hidden;
+shortcut.category.id;
+shortcut.category.name;
 ```
 
 
 <a name="files"></a>
-## Selected Files
+## Files
+
+### Selected Files
 
 If your shortcut makes use of file parameters or uses the content of a file as the request body then you can access information about these files using the `selectedFiles` array. Each selected file has an entry, allowing you to read out its file name, size (in bytes), media type and potentially some additional meta information.
 
@@ -141,7 +154,7 @@ selectedFiles[0].id;
 const allFileIds = selectedFiles.map(file => file.id);
 ```
 
-The `meta` field currently only provides information about images and is otherwise an empty object. It allows to read out an image's orientation and the timestamp of when it was created (in "YYYY-MM-DD HH:mm:ss" format):
+The `meta` field currently only provides information about images and is otherwise an empty object. It allows to read out an image's orientation and the timestamp of when it was created (in "yyyy-MM-dd HH:mm:ss" format):
 
 ```js
 const myMeta = selectedFiles[0].meta;
@@ -149,8 +162,8 @@ const myMeta = selectedFiles[0].meta;
 /*
 myMeta might look like this now:
 {
-    'created': '2022-12-31 23:59:59',
-    'orientation': 1,
+  'created': '2022-12-31 23:59:59',
+  'orientation': 1,
 }
 */
 ```
@@ -167,6 +180,30 @@ The `orientation` field is an integer with the following meaning:
 - 7 means a rotation of 270 degrees
 - 8 means a rotation of 270 degrees, and the image is mirrored
 
+
+<a name="read-write-files"></a>
+### Reading and Writing Files
+
+If you want to read from an existing file or write data to a file, you first need to mount the directory which contains the file. This can be done via the ["(Mounted) Directories screen](directories.md). Once you have a mounted directory, you can use the `getDirectory()` function to get a handle to it. Pass the name of the mounted directory as the first parameter. This handle then lets you read and write files, using the `readFile()` and `writeFile()` functions.
+
+For `readFiles()`, pass the name or path of the file you wish to read from as the first parameter, relative to the mounted directory. The file must exist, otherwise an error is raised. As an optional second parameter, you can pass the encoding that should be used to read the file, which defaults to UTF-8. The file's entire content is returned as a string.
+
+```js
+const dir = getDirectory('myMountedDirectory');
+const fileContent = dir.readFile('someDir/someFile.txt');
+```
+
+For `writeFiles()`, pass the name or path of the file you wish to write to as the first parameter, relative to the mounted directory. If the file or a directory along its path does not yet exist, it is automatically created.
+
+> If the file already exists, its contents will be replaced without warning!
+
+As the second parameter, pass the content you wish to write into the file.
+
+```js
+const dir = getDirectory('myMountedDirectory');
+dir.writeFile('someFile.txt', 'New file content');
+```
+
 <a name="user-interaction"></a>
 ## User Interaction
 
@@ -181,7 +218,7 @@ With this function you can display a toast message on the screen. Simply pass yo
 showToast('Hello World');
 ```
 
-Please note that no toast will be displayed if the string you pass is empty. Also note that a toast will show at most two lines of text, so it is best suited for short messages.
+> Please note that no toast will be displayed if the string you pass is empty. Also note that a toast will show at most two lines of text, so it is best suited for short messages.
 
 <a name="show-dialog"></a>
 ### showDialog
@@ -194,7 +231,7 @@ showDialog('My Message', 'My Title');
 showDialog('You can also use <b>basic</b> <i>HTML</i> for formatting the message.');
 ```
 
-Please note that no dialog will be displayed if the string you pass is empty.
+> Please note that no dialog will be displayed if the string you pass is empty.
 
 <a name="prompt-confirm"></a>
 ### prompt, confirm
@@ -207,7 +244,7 @@ Similar to how JavaScript works in a browser, you can use `prompt()` and `confir
 
 ```js
 if (confirm('Are you sure?')) {
-    // Do something only if the user clicked 'OK'
+  // Do something only if the user clicked 'OK'
 }
 ```
 
@@ -249,11 +286,11 @@ const myColor2 = promptColor("#FF0000");
 <a name="prompt-date"></a>
 ### promptDate
 
-The `promptDate()` function opens a date picker. The selected date is returned, or `null` if the picker is cancelled. As the first parameter, you may pass the date format that should be used for the return value (defaults to YYYY-MM-DD), and as a second parameter you may pass the preselected date (in YYYY-MM-DD format).
+The `promptDate()` function opens a date picker. The selected date is returned, or `null` if the picker is cancelled. As the first parameter, you may pass the date format that should be used for the return value (defaults to yyyy-MM-dd), and as a second parameter you may pass the preselected date (in yyyy-MM-dd format).
 
 ```js
 const myDate = promptDate();
-const myDate2 = promptDate("YYYY-MM-DD", "2050-12-31");
+const myDate2 = promptDate("yyyy-MM-dd", "2050-12-31");
 ```
 
 <a name="prompt-time"></a>
@@ -277,9 +314,9 @@ const starterPokemon = showSelection(['Bulbasaur', 'Charmander', 'Squirtle']);
 
 // Using an object
 const favoriteColor = showSelection({
-    '#ff0000': 'Red',
-    '#00ff00': 'Green',
-    '#0000ff': 'Blue',
+  '#ff0000': 'Red',
+  '#00ff00': 'Green',
+  '#0000ff': 'Blue',
 });
 ```
 
@@ -295,7 +332,9 @@ playSound();
 <a name="speak"></a>
 ### speak
 
-With this function you can have a piece of text be read out loud, using the device's text-to-speech engine. Simply pass the text you want to read as the first parameter, and optionally a language identifier as the second parameter. Please note that only the first 400 characters will be read. Please also note that the second parameter is ignored if the language is not supported.
+With this function you can have a piece of text be read out loud, using the device's text-to-speech engine. Simply pass the text you want to read as the first parameter, and optionally a language identifier as the second parameter.
+
+> Please note that only the first 400 characters will be read. Please also note that the second parameter is ignored if the language is not supported.
 
 ```js
 speak('Hello World');
@@ -303,7 +342,7 @@ speak('Hello World');
 speak('Dieser Text ist deutsch', 'de');
 ```
 
-This function may not be supported by all devices.
+> This function may not be supported by all devices.
 
 <a name="vibrate"></a>
 ### vibrate
@@ -354,7 +393,7 @@ With this function you can change the description of a shortcut. Simply pass the
 changeDescription('My Shortcut', 'New Description');
 ```
 
-Note: a shortcut's description is only visible in categories that use a list layout, not in those that use a grid layout.
+> A shortcut's description is only visible in categories that use a list layout, not in those that use a grid layout.
 
 <a name="change-icon"></a>
 ### changeIcon
@@ -364,6 +403,17 @@ With this function you can change the icon of a shortcut. Simply pass the name o
 ```js
 changeIcon('My Shortcut', 'bitsies_lightbulb');
 ```
+
+<a name="set-shortcut-hidden"></a>
+### setShortcutHidden
+
+This function allows you to show or hide individual shortcuts inside the app. Simply pass the name or ID of a shortcut as the first parameter and `true` or `false` as the second parameter. You can also pass an empty string as the first parameter to target the current shortcut.
+
+```js
+setShortcutHidden('My Shortcut', true);
+```
+
+> You can make hidden shortcuts visible via an option on the Settings screen.
 
 <a name="control-flow"></a>
 ## Control Flow
@@ -379,10 +429,10 @@ The `wait` function allows you to delay execution by waiting (also called sleepi
 wait(3000); // delay execution by 3 seconds
 ```
 
-Please note that this is a blocking action, meaning that you will not be able to interact with the app during the waiting time.
+> Please note that this is a blocking action, meaning that you will not be able to interact with the app during the waiting time.
 
 <a name="abort"></a>
-### abort and abortAll
+### abort, abortAll and abortAndTreatAsFailure
 
 With the `abort` function you can abort the execution of the shortcut.
 
@@ -391,6 +441,19 @@ abort();
 ```
 
 If the shortcut was called from another shortcut via the [executeShortcut](#execute-shortcut) function, only the current shortcut will be aborted. If you want to abort also the calling shortcut, you can use `abortAll()`.
+
+As part of the "Run on Success" code block, you can also use the `abortAndTreatAsFailure()` function, which skips the rest of the "success" steps and instead treats the execution as a failure, meaning that the "Run on Failure" code will be run, as well as any other failure-related steps such as displaying an error message. You can use this in cases where the default behavior of only checking the HTTP status code is not enough to determine whether a request should be considered a success. As an optional parameter, you can pass a string which will be used as the error message.
+
+```js
+// Basic example
+abortAndTreatAsFailure();
+
+// More realistic example
+const responseBody = JSON.parse(response.body);
+if (responseBody.status === 'error') {
+  abortAndTreatAsFailure(responseBody.error);
+}
+```
 
 <a name="text-processing"></a>
 ## Text Processing
@@ -430,6 +493,114 @@ const myHMACasHex = toHexString(myHMAC);
 // the value of `myHMACasHex` is '34d60d40202ae16ae3dd70c9715b1900f9fe30cf10af483e74ea8f6bef18bd09' now.
 ```
 
+<a name="parse-html"></a>
+### parseHTML
+
+The `parseHTML` function allows to parse an HTML string into an object representation. Each HTML element is converted into a JS object with attributes `name`, `attributes`, `children`, and `text` (if any), as is showcased by the following example:
+
+```js
+// Given some XML string
+const myHTML = `<html lang="de">
+  <head>
+    <title>Hello World</title>
+  </head>
+  <body>
+    <ul style="color: red">
+      <li>Item 1</li>
+      <li>Item 2</li>
+    </ul>
+  </body>
+</html>`;
+
+const result = parseHTML(myHTML);
+
+/*
+The result variable now holds the following object (blank text fields omitted for clarity):
+{
+  "name": "html",
+  "attributes": {
+    "lang": "de"
+  },
+  "children": [
+    {
+      "name": "head",
+      "attributes": {},
+      "children": [
+        {
+          "name": "title",
+          "attributes": {},
+           "children": [],
+           "text": "Hello World"
+        }
+      ]
+    },
+    {
+      "name": "body",
+      "attributes": {},
+      "children": [
+        {
+          "name": "ul",
+          "attributes": {
+            "style": "color: red"
+          },
+          "children": [
+            {
+              "name": "li",
+              "attributes": {},
+              "children": [],
+              "text": "Item 1"
+            },
+            {
+              "name": "li",
+              "attributes": {},
+              "children": [],
+              "text": "Item 2"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+*/
+
+// We can now easily extract the parts we're interested in
+const title = result.children[0].children[0].text;
+```
+
+As a second parameter, you can provide a CSS-style selector query to search for and parse only specific parts of the HTML. In this case, the returned value is an array of all found elements.
+```js
+const myHTML = '...'; // same as in the example above
+
+const result = parseHTML(myHTML, 'ul > li'); // query for all `li` elements which are direct decendants of `ul` elements.
+
+/*
+The result variable now holds the following list of objects:
+[
+  {
+    "name": "li",
+    "attributes": {},
+    "children": [],
+    "text": "Item 1"
+  },
+  {
+    "name": "li",
+    "attributes": {},
+    "children": [],
+    "text": "Item 2"
+  }
+]
+*/
+```
+
+In case you're not familiar with CSS selectors, here's some examples:
+- `li` would select all `<li>` elements
+- `.my-class` would select all elements that have the class "my-class"
+- `p img` would select all `<img>` elements which are within a `<p>` element (not necessarily as a direct child)
+- `a[href]` would select all `<a>` elements which have a `href` attribute
+- `[id="my-id"]` would select all elements which have the `id="my-id"` attribute
+- `ul.my-class > li` would select all `<li>` elements which are direct child elements of `<ul>` elements which have the "my-class" class
+
 <a name="parse-xml"></a>
 ### parseXML
 
@@ -446,19 +617,19 @@ const result = parseXML(myXML);
 /*
 The result variable now holds the following object:
 {
-    "name": "element",
-    "attributes": {},
-    "children": [
-        {
-            "name": "foo",
-            "attributes": {
-                "bar": "123"
-            },
-            "children": [],
-            "text": "Hello World"
-        }
-    ],
-    "text": "\n    \n"
+  "name": "element",
+  "attributes": {},
+  "children": [
+    {
+      "name": "foo",
+      "attributes": {
+        "bar": "123"
+      },
+      "children": [],
+      "text": "Hello World"
+    }
+  ],
+  "text": "\n    \n"
 }
 */
 
@@ -521,23 +692,42 @@ wakeOnLan('01-23-45-67-89-ab', '255.255.255.255', 9);
 The `sendMqttMessages` function allows you to connect to an MQTT broker, send (i.e. publish) one or more messages to it, and then disconnect again. The first parameter is the URI of the server/broker, the second (optional) parameter provides options for the connection (e.g. username and password) and the third parameter is a list of all the messages that should be sent.
 
 ```js
-sendMQTTMessages("tcp://192.168.0.42:1234", {"username": "admin", "password": "1234"}, [
+sendMQTTMessages(
+  "tcp://192.168.0.42:1234",
+  {"username": "admin", "password": "1234"},
+  [
     {"topic": "hallway-lamp/set", "payload": "{\"state\":\"ON\"}"},
     {"topic": "desk-lamp/set", "payload": "{\"state\":\"ON\", \"brightness\": 255}"},
-]);
+  ]
+);
 ```
 
-Please note that this does not provide any particular quality of service guarantees, and that it is not possible to subscribe to topics this way.
+> Please note that this does not provide any particular quality of service guarantees, and that it is not possible to subscribe to topics this way, meaning you can't receive any MQTT messages.
 
 <a name="send-tcp-packet"></a>
 ### Send TCP Packet
 
-You can use the `sendTCPPacket` function to send a TCP packet to another device on your network. Pass the packet data as the first parameter (either as a string, `Uint8Array` or array of numbers denoting bytes), the target host's name or IP address as the second parameter and its TCP port as the third parameter.
+You can use the `sendTCPPacket` function to send a TCP packet to another device on your network. This can be useful when interacting with devices that have a telnet interface.
+
+Pass the packet data as the first parameter (either as a string, `Uint8Array` or array of numbers denoting bytes), the target host's name or IP address as the second parameter and its TCP port as the third parameter.
 
 ```js
 sendTCPPacket('hello', '192.168.1.42', 1337);
 
 sendTCPPacket([0x68, 0x65, 0x6C, 0x6C, 0x6F], 'example.com', 4242);
+```
+
+If you want to listen for incoming data from the TCP connection, you can specify so by passing in a configuration object as the fourth parameter. This object may have the following fields:
+
+- `read`: If set to "text", all incoming data is read as text and returned as a string. If set to "line", only a single line of text is read and returned as a string. If not specified, nothing is read and `null` is returned.
+- `timeout`: The time in milliseconds after which the socket is automatically closed. Must be at most 30000, defaults to 3000. If `read` is set to "text" and this timeout is hit, all data that was read until that point is returned.
+- `charset`: The charset that should be used to decode the incoming data. Defaults to UTF-8.
+
+```js
+const reply = sendTCPPacket('hello', '192.168.1.42', 1337, {
+  read: 'text',
+  timeout: 300,
+});
 ```
 
 <a name="send-udp-packet"></a>
@@ -569,12 +759,14 @@ Optionally you can pass an object as the second parameter to provide values for 
 
 ```js
 enqueueShortcut('My Other Shortcut', {
-    'My_Variable1': 'Hello World',
-    'My_Variable2': ':D',
+  'My_Variable1': 'Hello World',
+  'My_Variable2': ':D',
 });
 ```
 
-As an optional third parameter, you can pass the number of milliseconds by which to delay the execution. This way you can schedule a shortcut to run at a later point in time. Please note that the delay will not be exact and can not exceed 5 minutes.
+As an optional third parameter, you can pass the number of milliseconds by which to delay the execution. This way you can schedule a shortcut to run at a later point in time.
+
+> Please note that the delay will not be exact and can not exceed 5 minutes.
 
 ```js
 enqueueShortcut('My Other Shortcut', null, 2 * 60 * 1000); // runs in 2 minutes
@@ -582,7 +774,7 @@ enqueueShortcut('My Other Shortcut', null, 2 * 60 * 1000); // runs in 2 minutes
 
 Note that the shortcut will only be executed once the current shortcut (and all shortcuts that have been enqueued before it) has finished executing. It will *not* be executed immediately. If you need the shortcut to run immediately, use `executeShortcut` instead.
 
-Also note that this might lead to infinite loops if the enqueued shortcut also enqueues shortcuts. To reduce the impact of this in case it happens accidentally, the app will delay every 10th execution by 5 seconds so that have enough time to stop the execution manually. If you're really sure that you *do* want an infinite loop, you can work around this protection by setting a delay of at least 500 milliseconds.
+Also note that this might lead to infinite loops if the enqueued shortcut also enqueues shortcuts. To reduce the impact of this in case it happens accidentally, the app will delay every 10th execution by 5 seconds so that you have enough time to stop the execution manually. If you're really sure that you *do* want an infinite loop, you can work around this protection by setting a delay of at least 500 milliseconds.
 
 <a name="execute-shortcut"></a>
 ### executeShortcut
@@ -597,8 +789,8 @@ Optionally you can pass an object as the second parameter to provide values for 
 
 ```js
 executeShortcut('My Other Shortcut', {
-    'My_Variable1': 'Hello World',
-    'My_Variable2': ':D',
+  'My_Variable1': 'Hello World',
+  'My_Variable2': ':D',
 });
 ```
 
@@ -612,14 +804,14 @@ The function will return an object which contains a `status` field which you can
 ```js
 const result = executeShortcut('My Other Shortcut');
 if (result.status === 'success') {
-    const body = result.response.body;
-    alert(body);
+  const body = result.response.body;
+  alert(body);
 } else if (result.status === 'failure') {
-    if (result.networkError) {
-        alert(result.networkError);
-    } else {
-        alert(result.response.body);
-    }
+  if (result.networkError) {
+    alert(result.networkError);
+  } else {
+    alert(result.response.body);
+  }
 }
 ```
 
@@ -649,17 +841,17 @@ When executing or enqueuing another shortcut, it is possible to forward one or m
 ```js
 // Pass a single file
 enqueueShortcut('My Other Shortcut', {
-    '$files': selectedFiles[0].id,
+  '$files': selectedFiles[0].id,
 });
 
 // Pass 2 files
 enqueueShortcut('My Other Shortcut', {
-    '$files': [selectedFiles[0].id, selectedFiles[1].id],
+  '$files': [selectedFiles[0].id, selectedFiles[1].id],
 });
 
 // Pass all files
 enqueueShortcut('My Other Shortcut', {
-    '$files': selectedFiles.map(file => file.id),
+  '$files': selectedFiles.map(file => file.id),
 });
 ```
 
@@ -714,7 +906,7 @@ You can use the `shareText` function to share a piece of text with another app. 
 shareText('Hello World');
 ```
 
-Please note that the text that is shared can be at most 200000 characters long, otherwise it will be truncated.
+> Please note that the text that is shared can be at most 200000 characters long, otherwise it will be truncated.
 
 <a name="open-app"></a>
 ### Open another App
@@ -734,7 +926,14 @@ This function allows you to open a URL in another app. This typically opens a br
 openUrl('https://www.wikipedia.org/');
 ```
 
-Please note that this can not be used to open files.
+> Please note that this can not be used to open files.
+
+As a second parameter, you may pass the package name of the browser or app that should handle the URL. You may instead also pass "custom-tabs" or "custom-tabs(\[package-name])" to open the URL using a custom tab instead of a standalone browser window.
+
+```js
+openUrl('https://example.com', 'org.mozilla.firefox');
+openUrl('https://example.com', 'custom-tabs(org.mozilla.firefox)');
+```
 
 <a name="send-intent"></a>
 ### Send Intent
@@ -764,23 +963,23 @@ Each extra consists of the following properties:
 |type|The type of the extra|`'string'` (default), `'boolean'`, `'int'`, `'long'`, `'double'`, `'float'`|
 |value|The value of the extra|depends on the `type`|
 
-Please note that it is unfortunately *not* possible to send intents that require the app to hold a specific permission, as there is no way to dynamically add such a permission to the app. This is a technical limitation that the app itself cannot address. The recommended workaround is to use a 3rd-party automation app such as Tasker to perform such actions and trigger their tasks/workflows either via an intent or via the `triggerTaskerTask` function (see below). Another possibility would be to fork the app, add the required permission to it and build it yourself.
+> Please note that it is unfortunately *not* possible to send intents that require the app to hold a specific permission, as there is no way to dynamically add such a permission to the app. This is a technical limitation that the app itself cannot address. The recommended workaround is to use a 3rd-party automation app such as Tasker to perform such actions and trigger their tasks/workflows either via an intent or via the `triggerTaskerTask` function (see below). Another possibility would be to fork the app, add the required permission to it and build it yourself.
 
 Here is a generic example showing the syntax:
 
 ```js
 sendIntent({
-    type: 'activity',
-    action: 'my.special.action',
-    packageName: 'com.example.foobar',
-    className: 'com.example.foobar.MainActivity',
-    extras: [
-        {
-            name: 'favorite_number',
-            type: 'int',
-            value: 42,
-        },
-    ],
+  type: 'activity',
+  action: 'my.special.action',
+  packageName: 'com.example.foobar',
+  className: 'com.example.foobar.MainActivity',
+  extras: [
+    {
+      name: 'favorite_number',
+      type: 'int',
+      value: 42,
+    },
+  ],
 });
 ```
 
@@ -788,9 +987,9 @@ The following example shows how you can use this function to open another applic
 
 ```js
 sendIntent({
-    type: 'activity',
-    action: 'android.intent.action.VIEW',
-    dataUri: 'https://example.com',
+  type: 'activity',
+  action: 'android.intent.action.VIEW',
+  dataUri: 'https://example.com',
 });
 ```
 The above example is equivalent to calling `openUrl('https://example.com')`.
@@ -799,9 +998,9 @@ If you want to just open a specific app without sending any data to it, you can 
 
 ```js
 sendIntent({
-    type: 'activity',
-    action: 'android.intent.action.MAIN',
-    packageName: 'com.android.chrome',
+  type: 'activity',
+  action: 'android.intent.action.MAIN',
+  packageName: 'com.android.chrome',
 });
 ```
 
@@ -815,12 +1014,23 @@ If you have [Tasker](https://play.google.com/store/apps/details?id=net.dinglisch
 triggerTaskerTask('doStuff');
 
 triggerTaskerTask('mytask', {
-    myLocalVariable: 'hello',
-    andAnother: 'world',
+  myLocalVariable: 'hello',
+  andAnother: 'world',
 });
 ```
 
-Please note that you may need to manually go to the app's permissions and grant the "net.dinglisch.android.tasker.PERMISSION_RUN_TASKS" permission for this to work, and also you will need to allow this in Tasker's settings under "Preferences > Misc > Allow External Access".
+> Please note that you may need to manually go to the app's permissions and allow the app to run Tasker tasks for this to work, and also you will need to allow this in Tasker's settings under "Preferences > Misc > Allow External Access".
+
+<a name="set-wireguard-tunnel-state"></a>
+### Set Wireguard Tunnel State
+If you have [Wireguard](https://play.google.com/store/apps/details?id=com.wireguard.android) installed, you can use the `setWireguardTunnelState` function to enable or disable a tunnel. Pass in the name of the tunnel as the first parameter, and as the second parameter pass `true` to enable the tunnel or `false` to disable it.
+
+```js
+setWireguardTunnelState('my-tunnel', true);
+```
+
+> For this to work, you will need to grant the app a special permission, and you will need to enable the "Allow remote control apps" setting in the Wireguard app. You might also need to exclude the Wireguard app from battery optimizations and allow it to run unrestricted.
+
 
 <a name="get-location"></a>
 ### Get Location
@@ -839,13 +1049,13 @@ The resulting object consists of the following fields:
 ```js
 const myLocation = getLocation();
 if (myLocation.status == 'success') {
-    alert(`I am currently at ${myLocation.coordinates}`);
+  alert(`I am currently at ${myLocation.coordinates}`);
 } else {
-    alert('I am so lost right now');
+  alert('I am so lost right now');
 }
 ```
 
-Please note that this function makes use of Google Play Services. If those are not available on the device, or if you've installed the app from F-Droid, then a fallback is used which may be less accurate, less reliable or take longer to find the location.
+> Please note that this function makes use of Google Play Services. If those are not available on the device, or if you've installed the app from F-Droid, then a fallback is used which may be less accurate, less reliable or take longer to find the location.
 
 <a name="examples"></a>
 ## Examples
@@ -881,11 +1091,11 @@ This example shows how the shortcut icon and label can be changed based on the r
 
 ```js
 if (response.body == 'OK') {
-    renameShortcut('', 'Success');
-    changeIcon('', 'freepik_check'); // changes the icon of the current shortcut to a green checkmark
+  renameShortcut('', 'Success');
+  changeIcon('', 'freepik_check'); // changes the icon of the current shortcut to a green checkmark
 } else {
-    renameShortcut('', 'Failure');
-    changeIcon('', 'freepik_close'); // changes the icon of the current shortcut to a red cross
+  renameShortcut('', 'Failure');
+  changeIcon('', 'freepik_close'); // changes the icon of the current shortcut to a red cross
 }
 ```
 
@@ -895,8 +1105,8 @@ This example shows how you can show a custom confirmation message before the sho
 
 ```js
 if (!confirm('Should I do the thing?')) {
-    showToast('Not doing the thing.');
-    abort();
+  showToast('Not doing the thing.');
+  abort();
 }
 ```
 
@@ -904,10 +1114,10 @@ Or you might want to bypass the confirmation step if you are in your home networ
 
 ```js
 if (getWifiSSID() != 'My Home Network') {
-    if (!confirm('Should I do the thing?')) {
-        showToast('Not doing the thing.');
-        abort();
-    }
+  if (!confirm('Should I do the thing?')) {
+    showToast('Not doing the thing.');
+    abort();
+  }
 }
 ```
 
